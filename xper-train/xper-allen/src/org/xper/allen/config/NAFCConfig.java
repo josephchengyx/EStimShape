@@ -18,8 +18,10 @@ import org.springframework.config.java.util.DefaultScopes;
 import org.xper.acq.mock.SocketSamplingDeviceServer;
 import org.xper.allen.drawing.LeftRightScreenMarker;
 import org.xper.allen.intan.NAFCDigitalTriggerIntanStimulationRecordingController;
+import org.xper.allen.nafc.NAFCPngScene;
 import org.xper.allen.nafc.experiment.*;
 import org.xper.allen.nafc.eye.NAFCEyeMonitorController;
+import org.xper.allen.nafc.experiment.mock.NAFCMockDatabaseTaskDataSource;
 import org.xper.config.*;
 import org.xper.drawing.renderer.AbstractRenderer;
 import org.xper.drawing.renderer.PerspectiveRenderer;
@@ -254,14 +256,19 @@ public class NAFCConfig {
 		return source;
 	}
 
+//	@Bean
+//	public NAFCDatabaseTaskDataSource databaseTaskDataSource() {
+//		NAFCDatabaseTaskDataSource source = new NAFCDatabaseTaskDataSource();
+//		source.setDbUtil(allenDbUtil());
+//		source.setQueryInterval(1000);
+//		source.setUngetBehavior(xperUngetPolicy());
+//		source.setUngetTaskThreshold(xperUngetTaskThreshold());
+//		return source;
+//	}
+
 	@Bean
 	public NAFCDatabaseTaskDataSource databaseTaskDataSource() {
-		NAFCDatabaseTaskDataSource source = new NAFCDatabaseTaskDataSource();
-		source.setDbUtil(allenDbUtil());
-		source.setQueryInterval(1000);
-		source.setUngetBehavior(xperUngetPolicy());
-		source.setUngetTaskThreshold(xperUngetTaskThreshold());
-		return source;
+		return new NAFCMockDatabaseTaskDataSource();
 	}
 
 	@Bean
@@ -355,6 +362,7 @@ public class NAFCConfig {
 		state.setRequiredTargetSelectionHoldTime(xperRequiredTargetSelectionHoldTime());
 		state.setTargetSelectionStartDelay(xperTargetSelectionEyeMonitorStartDelay());
 		state.setBlankTargetScreenDisplayTime(xperBlankTargetScreenDisplayTime());
+		state.setSampleToChoiceDelayTime(xperSampleToChoiceDelayTime());
 		return state;
 	}
 
@@ -496,7 +504,7 @@ public class NAFCConfig {
 
 	@Bean
 	public NAFCTaskScene taskScene() {
-		NAFCGaussScene scene = new NAFCGaussScene();
+		NAFCPngScene scene = new NAFCPngScene();
 		scene.setRenderer(experimentGLRenderer());
 		scene.setFixation(classicConfig.experimentFixationPoint());
 		scene.setMarker(screenMarker());
@@ -540,9 +548,14 @@ public class NAFCConfig {
 		return strategy;
 	}
 
+//	@Bean(scope = DefaultScopes.PROTOTYPE)
+//	public Boolean xperShowAnswer(){
+//		return Boolean.parseBoolean(baseConfig.systemVariableContainer().get("xper_nafc_show_answer",0));
+//	}
+
 	@Bean(scope = DefaultScopes.PROTOTYPE)
 	public Boolean xperShowAnswer(){
-		return Boolean.parseBoolean(baseConfig.systemVariableContainer().get("xper_nafc_show_answer",0));
+		return true;
 	}
 
 	@Bean(scope = DefaultScopes.PROTOTYPE)
@@ -597,14 +610,29 @@ public class NAFCConfig {
 		return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_blank_target_screen_display_time", 0));
 	}
 
+//	@Bean(scope = DefaultScopes.PROTOTYPE)
+//	public Integer xperSampleToChoiceDelayTime() {
+//		return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_sample_to_choice_delay_time", 0));
+//	}
+
+	@Bean(scope = DefaultScopes.PROTOTYPE)
+	public Integer xperSampleToChoiceDelayTime() {
+		return 1;
+	}
+
 	@Bean(scope = DefaultScopes.PROTOTYPE)
 	public Integer xperSampleLength() {
 		return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_sample_length", 0));
 	}
 
+//	@Bean(scope = DefaultScopes.PROTOTYPE)
+//	public Integer xperShowAnswerLength() {
+//		return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_answer_length", 0));
+//	}
+
 	@Bean(scope = DefaultScopes.PROTOTYPE)
 	public Integer xperShowAnswerLength() {
-		return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_answer_length", 0));
+		return 1;
 	}
 
 	@Bean(scope = DefaultScopes.PROTOTYPE)

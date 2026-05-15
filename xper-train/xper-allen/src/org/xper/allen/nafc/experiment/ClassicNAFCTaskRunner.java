@@ -186,6 +186,19 @@ public class ClassicNAFCTaskRunner implements NAFCTaskRunner {
         NAFCEventUtil.fireSampleOffEvent(sampleOffLocalTime, choiceEventListeners, currentContext);
         currentContext.setAnimationFrameIndex(0);
 
+        //DELAY period between SAMPLE and CHOICES
+        do {
+            if(!eyeController.isEyeIn()) {
+                long eyeInHoldFailLocalTime = timeUtil.currentTimeMicros();
+                currentContext.setEyeInHoldFailTime(eyeInHoldFailLocalTime);
+                drawingController.eyeInHoldFail(currentContext);
+                EventUtil.fireEyeInHoldFailEvent(eyeInHoldFailLocalTime,
+                        trialEventListeners, currentContext);
+
+                return NAFCTrialResult.EYE_IN_HOLD_FAIL;
+            }
+            //do nothing
+        } while(timeUtil.currentTimeMicros()<sampleOffLocalTime + stateObject.getSampleToChoiceDelayTime()* 1000L);
 
         //SHOW CHOICES
         drawingController.showChoice(currentTask, currentContext);

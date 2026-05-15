@@ -20,6 +20,7 @@ public class NAFCExperimentState extends NAFCTrialExperimentState{
 
 
 	int blankTargetScreenDisplayTime;
+	int sampleToChoiceDelayTime;
 
 	public EyeTargetSelector getTargetSelector() {
 		return targetSelector;
@@ -53,6 +54,14 @@ public class NAFCExperimentState extends NAFCTrialExperimentState{
 
 	public void setBlankTargetScreenDisplayTime(int blankTargetScreenDisplayTime) {
 		this.blankTargetScreenDisplayTime = blankTargetScreenDisplayTime;
+	}
+
+	public int getSampleToChoiceDelayTime() {
+		return sampleToChoiceDelayTime;
+	}
+
+	public void setSampleToChoiceDelayTime(int sampleToChoiceDelayTime) {
+		this.sampleToChoiceDelayTime = sampleToChoiceDelayTime;
 	}
 
 	public List<? extends EStimEventListener> geteStimEventListeners() {

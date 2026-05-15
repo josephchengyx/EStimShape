@@ -1,0 +1,10 @@
+<StimSpec animation="false">
+  <xCenter>0.0</xCenter>
+  <yCenter>0.0</yCenter>
+  <dimensions>
+    <width>50.0</width> //degrees of visual angle
+    <height>50.0</height>
+  </dimensions>
+  <path>/home/connorlab/Documents/GitHub/EStimShape/xper-train/xper-allen/src/org/xper/allen/nafc/experiment/mock/cue_stim.png</path>
+  <alpha>1.0</alpha>
+</StimSpec>
