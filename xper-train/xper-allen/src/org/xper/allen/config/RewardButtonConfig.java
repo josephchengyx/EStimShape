@@ -20,6 +20,7 @@ import org.xper.exception.ExperimentSetupException;
 import org.xper.eye.mapping.MappingAlgorithm;
 import org.xper.juice.AnalogJuice;
 import org.xper.juice.DynamicJuice;
+import org.xper.juice.mock.NullDynamicJuice;
 
 import java.util.HashMap;
 
@@ -51,6 +52,9 @@ public class RewardButtonConfig {
 
     @Bean
     public DynamicJuice consoleButtonJuice() {
+        if (acqConfig.acqDriverName.equalsIgnoreCase(acqConfig.DAQ_NONE)) {
+            return new NullDynamicJuice();
+        }
         AnalogJuice juice = new AnalogJuice();
         juice.setBonusDelay(classicConfig.xperJuiceBonusDelay());
         juice.setBonusProbability(classicConfig.xperJuiceBonusProbability());

@@ -2,6 +2,7 @@ package org.xper.allen.nafc;
 
 import org.lwjgl.opengl.GL11;
 import org.xper.Dependency;
+import org.xper.classic.vo.TrialContext;
 import org.xper.rfplot.drawing.png.ImageDimensions;
 import org.xper.rfplot.drawing.png.TranslatableResizableImages;
 import org.xper.allen.nafc.experiment.NAFCExperimentTask;
@@ -94,7 +95,6 @@ public class NAFCPngScene extends AbstractTaskScene implements NAFCTaskScene{
 				}
 				int index = 0; //Should be zero, the sample is assigned index of zero.
 				images.draw(context, index, sampleLocation, sampleDimensions);
-				images.cleanUpImage(index);
 				if (useStencil) {
 					// 1 will pass for fixation and marker regions
 					GL11.glStencilFunc(GL11.GL_EQUAL, 1, 1);
@@ -125,7 +125,6 @@ public class NAFCPngScene extends AbstractTaskScene implements NAFCTaskScene{
 				for (int i = 0; i < numChoices; i++){
 					//System.out.println();
 					images.draw(context,i+1, choiceLocations[i], choiceDimensions[i]);
-					images.cleanUpImage(i+1);
 				}
 				if (useStencil) {
 					// 1 will pass for fixation and marker regions
@@ -156,7 +155,6 @@ public class NAFCPngScene extends AbstractTaskScene implements NAFCTaskScene{
 
 				//System.out.println();
 				images.draw(context,i+1, choiceLocations[i], choiceDimensions[i]);
-				images.cleanUpImage(i+1);
 
 				if (useStencil) {
 					// 1 will pass for fixation and marker regions
@@ -172,6 +170,17 @@ public class NAFCPngScene extends AbstractTaskScene implements NAFCTaskScene{
 					GL11.glStencilFunc(GL11.GL_EQUAL, 0, 1);
 				}
 			}}, context);
+	}
+
+
+	@Override
+	public void trialStop(TrialContext context) {
+		if (images != null) {
+			for (int i = 0; i < numChoices+1; i++) {
+				images.cleanUpImage(i);
+			}
+		}
+
 	}
 
 

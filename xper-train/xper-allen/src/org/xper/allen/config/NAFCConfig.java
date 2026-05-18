@@ -617,7 +617,7 @@ public class NAFCConfig {
 
 	@Bean(scope = DefaultScopes.PROTOTYPE)
 	public Integer xperSampleToChoiceDelayTime() {
-		return 1;
+		return 1_000;
 	}
 
 	@Bean(scope = DefaultScopes.PROTOTYPE)
@@ -632,7 +632,7 @@ public class NAFCConfig {
 
 	@Bean(scope = DefaultScopes.PROTOTYPE)
 	public Integer xperShowAnswerLength() {
-		return 1;
+		return 1_000;
 	}
 
 	@Bean(scope = DefaultScopes.PROTOTYPE)
