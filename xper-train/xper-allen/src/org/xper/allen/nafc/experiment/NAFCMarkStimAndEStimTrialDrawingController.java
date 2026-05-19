@@ -77,21 +77,15 @@ public class NAFCMarkStimAndEStimTrialDrawingController extends MarkStimTrialDra
 		getWindow().swapBuffers();
 	}
 
-
-
-	@Override
-	public void showAnswer(NAFCExperimentTask task, NAFCTrialContext context) {
-		int[] correct = task.getRewardList();
-
-		if(task != null && correct.length > 0) {
-			getTaskScene().drawChoice(context, false, correct[0]);
+	public void showDelay(NAFCExperimentTask task, NAFCTrialContext context) {
+		if(task != null) {
+			leftRightMarker.left();
+			getTaskScene().drawBlank(context, true, true);
 		} else {
 			getTaskScene().drawBlank(context, false, false);
 		}
 		getWindow().swapBuffers();
-
 	}
-
 
 	public void prepareChoice(NAFCExperimentTask task, NAFCTrialContext context) {
 		if (task != null) {
@@ -101,9 +95,22 @@ public class NAFCMarkStimAndEStimTrialDrawingController extends MarkStimTrialDra
 
 	public void showChoice(NAFCExperimentTask task, NAFCTrialContext context) {
 		if(task != null) {
-			leftRightMarker.left();
+			leftRightMarker.right();
 			getTaskScene().drawChoices(context, false);
 			screenShotter.takeScreenShot(String.valueOf(task.getStimId()) + "_choices");
+		} else {
+			getTaskScene().drawBlank(context, false, false);
+		}
+		getWindow().swapBuffers();
+	}
+
+	@Override
+	public void showAnswer(NAFCExperimentTask task, NAFCTrialContext context) {
+		int[] correct = task.getRewardList();
+
+		if(task != null && correct.length > 0) {
+			leftRightMarker.left();
+			getTaskScene().drawChoice(context, false, correct[0]);
 		} else {
 			getTaskScene().drawBlank(context, false, false);
 		}

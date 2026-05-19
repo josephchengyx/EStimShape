@@ -548,11 +548,6 @@ public class NAFCConfig {
 		return strategy;
 	}
 
-//	@Bean(scope = DefaultScopes.PROTOTYPE)
-//	public Boolean xperShowAnswer(){
-//		return Boolean.parseBoolean(baseConfig.systemVariableContainer().get("xper_nafc_show_answer",0));
-//	}
-
 	@Bean(scope = DefaultScopes.PROTOTYPE)
 	public Boolean xperShowAnswer(){
 		return true;
@@ -610,11 +605,6 @@ public class NAFCConfig {
 		return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_blank_target_screen_display_time", 0));
 	}
 
-//	@Bean(scope = DefaultScopes.PROTOTYPE)
-//	public Integer xperSampleToChoiceDelayTime() {
-//		return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_sample_to_choice_delay_time", 0));
-//	}
-
 	@Bean(scope = DefaultScopes.PROTOTYPE)
 	public Integer xperSampleToChoiceDelayTime() {
 		return 1_000;
@@ -625,14 +615,9 @@ public class NAFCConfig {
 		return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_sample_length", 0));
 	}
 
-//	@Bean(scope = DefaultScopes.PROTOTYPE)
-//	public Integer xperShowAnswerLength() {
-//		return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_answer_length", 0));
-//	}
-
 	@Bean(scope = DefaultScopes.PROTOTYPE)
 	public Integer xperShowAnswerLength() {
-		return 1_000;
+		return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_answer_length", 0));
 	}
 
 	@Bean(scope = DefaultScopes.PROTOTYPE)

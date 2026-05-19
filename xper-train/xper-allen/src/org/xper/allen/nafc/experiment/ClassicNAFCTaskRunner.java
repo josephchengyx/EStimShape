@@ -187,6 +187,7 @@ public class ClassicNAFCTaskRunner implements NAFCTaskRunner {
         currentContext.setAnimationFrameIndex(0);
 
         //DELAY period between SAMPLE and CHOICES
+        drawingController.showDelay(currentTask, currentContext);
         do {
             if(!eyeController.isEyeIn()) {
                 long eyeInHoldFailLocalTime = timeUtil.currentTimeMicros();
