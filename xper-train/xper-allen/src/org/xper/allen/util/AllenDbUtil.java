@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.xper.allen.passive.PassiveExperimentTask;
 import org.xper.util.DbUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -352,6 +353,12 @@ public class AllenDbUtil extends DbUtil {
 						task.setXfmSpec(rs.getString("xfm_spec"));
 						taskToDo.add(task);
 					}});
+		return taskToDo;
+	}
+
+	public LinkedList<PassiveExperimentTask> readPassiveExperimentTasks(long genId,
+																  long lastDoneTaskId) {
+		final LinkedList<PassiveExperimentTask> taskToDo = new LinkedList<PassiveExperimentTask>();
 		return taskToDo;
 	}
 

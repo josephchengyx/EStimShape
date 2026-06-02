@@ -1,42 +1,143 @@
 package org.xper.allen.config;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.config.java.annotation.*;
 import org.springframework.config.java.annotation.valuesource.SystemPropertiesValueSource;
 import org.springframework.config.java.plugin.context.AnnotationDrivenConfig;
 import org.springframework.config.java.util.DefaultScopes;
+import org.xper.acq.mock.SocketSamplingDeviceServer;
 import org.xper.allen.app.fixation.PngScene;
+import org.xper.allen.passive.PassiveDatabaseTaskDataSource;
 import org.xper.allen.passive.PassiveSlideRunner;
 import org.xper.allen.passive.mock.PassiveMockDatabaseTaskDataSource;
-import org.xper.config.AcqConfig;
-import org.xper.config.BaseConfig;
-import org.xper.config.ClassicConfig;
+import org.xper.allen.util.AllenDbUtil;
+import org.xper.config.*;
+import org.xper.console.ExperimentConsole;
+import org.xper.console.ExperimentConsoleModel;
+import org.xper.console.ExperimentMessageReceiver;
 import org.xper.drawing.object.BlankScreen;
 import org.xper.drawing.renderer.AbstractRenderer;
 import org.xper.drawing.renderer.PerspectiveRenderer;
+import org.xper.exception.DbException;
+import org.xper.experiment.DatabaseTaskDataSource.UngetPolicy;
 import org.xper.experiment.TaskDataSource;
-import org.xper.experiment.TaskDoneCache;
+import org.xper.experiment.listener.ExperimentEventListener;
+import org.xper.classic.TrialEventListener;
+import org.xper.eye.mapping.MappingAlgorithm;
+import org.xper.intan.SlideTrialIntanRecordingController;
+
+import javax.sql.DataSource;
+import java.beans.PropertyVetoException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 @Configuration(defaultLazy = Lazy.TRUE)
 @SystemPropertiesValueSource
 @AnnotationDrivenConfig
-@Import({ClassicConfig.class})
+@Import({ClassicConfig.class, RewardButtonConfig.class, IntanRHSConfig.class})
 public class PassiveConfig {
 
     @Autowired ClassicConfig classicConfig;
     @Autowired BaseConfig baseConfig;
     @Autowired AcqConfig acqConfig;
+    @Autowired RewardButtonConfig rewardButtonConfig;
+    @Autowired IntanRHSConfig intanConfig;
+    @Autowired IntanRHDConfig rhdConfig;
 
-    // ---- Slide runner ----
+    @ExternalValue("jdbc.driver")
+    public String jdbcDriver;
+    @ExternalValue("jdbc.url")
+    public String jdbcUrl;
+    @ExternalValue("jdbc.username")
+    public String jdbcUserName;
+    @ExternalValue("jdbc.password")
+    public String jdbcPassword;
+
+    @ExternalValue("experiment.monkey_window_fullscreen")
+    public boolean monkeyWindowFullScreen;
 
     @Bean
-    public PassiveSlideRunner slideRunner() {
-        PassiveSlideRunner runner = new PassiveSlideRunner();
-        runner.setPunisher(classicConfig.punisher());
-        return runner;
+    public AbstractRenderer experimentGLRenderer() {
+        PerspectiveRenderer renderer = new PerspectiveRenderer();
+        renderer.setDistance(classicConfig.xperMonkeyScreenDistance());
+        renderer.setDepth(classicConfig.xperMonkeyScreenDepth());
+        renderer.setHeight(classicConfig.xperMonkeyScreenHeight());
+        renderer.setWidth(classicConfig.xperMonkeyScreenWidth());
+        renderer.setPupilDistance(classicConfig.xperMonkeyPupilDistance());
+        return renderer;
     }
 
-    // ---- Scene ----
+    @Bean
+    public AllenDbUtil allenDbUtil() {
+        AllenDbUtil dbUtil = new AllenDbUtil();
+        dbUtil.setDataSource(dataSource());
+        return dbUtil;
+    }
+
+    @Bean
+    public ExperimentConsole experimentConsole() {
+        ExperimentConsole console = new ExperimentConsole();
+        console.setPaused(classicConfig.xperExperimentInitialPause());
+        console.setConsoleRenderer(classicConfig.consoleRenderer());
+        console.setMonkeyScreenDimension(classicConfig.monkeyWindow().getScreenDimension());
+        console.setModel(classicConfig.experimentConsoleModel());
+        console.setCanvasScaleFactor(3);
+
+        ExperimentMessageReceiver receiver = classicConfig.messageReceiver();
+        receiver.addMessageReceiverEventListener(console);
+
+        return console;
+    }
+
+    @Bean
+    public ExperimentConsoleModel experimentConsoleModel () {
+        ExperimentConsoleModel model = new ExperimentConsoleModel();
+        model.setMessageReceiver(classicConfig.messageReceiver());
+        model.setLocalTimeUtil(baseConfig.localTimeUtil());
+
+        HashMap<String, MappingAlgorithm> eyeMappingAlgorithm = new HashMap<String, MappingAlgorithm>();
+        eyeMappingAlgorithm.put(classicConfig.xperLeftIscanId(), classicConfig.leftIscanMappingAlgorithm());
+        eyeMappingAlgorithm.put(classicConfig.xperRightIscanId(), classicConfig.rightIscanMappingAlgorithm());
+        model.setEyeMappingAlgorithm(eyeMappingAlgorithm);
+
+        model.setExperimentRunnerClient(rewardButtonConfig.experimentRunnerClient());
+        model.setChannelMap(classicConfig.iscanChannelMap());
+        model.setMessageHandler(classicConfig.messageHandler());
+
+        if (classicConfig.consoleEyeSimulation || acqConfig.acqDriverName.equalsIgnoreCase(acqConfig.DAQ_NONE)) {
+            // socket sampling server for eye simulation
+            SocketSamplingDeviceServer server = new SocketSamplingDeviceServer();
+            server.setHost(classicConfig.consoleHost);
+            server.setSamplingDevice(model);
+            HashMap<Integer, Double> data = new HashMap<Integer, Double>();
+            data.put(classicConfig.xperLeftIscanXChannel(), new Double(0));
+            data.put(classicConfig.xperLeftIscanYChannel(), new Double(0));
+            data.put(classicConfig.xperRightIscanXChannel(), new Double(0));
+            data.put(classicConfig.xperRightIscanYChannel(), new Double(0));
+            server.setCurrentChannelData(data);
+
+            model.setSamplingServer(server);
+        }
+
+
+        return model;
+    }
+
+    @Bean
+    public DataSource dataSource() {
+        ComboPooledDataSource source = new ComboPooledDataSource();
+        try {
+            source.setDriverClass(jdbcDriver);
+        } catch (PropertyVetoException e) {
+            throw new DbException(e);
+        }
+        source.setJdbcUrl(jdbcUrl);
+        source.setUser(jdbcUserName);
+        source.setPassword(jdbcPassword);
+        return source;
+    }
 
     @Bean
     public PngScene taskScene() {
@@ -53,47 +154,88 @@ public class PassiveConfig {
     }
 
     @Bean
-    public AbstractRenderer experimentGLRenderer() {
-        PerspectiveRenderer r = new PerspectiveRenderer();
-        r.setDistance(classicConfig.xperMonkeyScreenDistance());
-        r.setDepth(classicConfig.xperMonkeyScreenDepth());
-        r.setHeight(classicConfig.xperMonkeyScreenHeight());
-        r.setWidth(classicConfig.xperMonkeyScreenWidth());
-        r.setPupilDistance(classicConfig.xperMonkeyPupilDistance());
-        return r;
+    public SlideTrialIntanRecordingController intanRecordingController() {
+        SlideTrialIntanRecordingController controller = new SlideTrialIntanRecordingController();
+        controller.setIntan(intanConfig.intan());
+        controller.setRecordingEnabled(intanConfig.intanRecordingEnabled());
+        controller.setFileNamingStrategy(rhdConfig.intanFileNamingStrategy());
+        return controller;
     }
 
-    // ---- Task source ----
+    @Bean
+    public PassiveSlideRunner slideRunner() {
+        PassiveSlideRunner runner = new PassiveSlideRunner();
+        runner.setPunisher(classicConfig.punisher());
+        return runner;
+    }
 
     @Bean
     public TaskDataSource taskDataSource() {
+        return databaseTaskDataSource();
+    }
+
+//    @Bean
+//    public PassiveDatabaseTaskDataSource databaseTaskDataSource() {
+//        PassiveDatabaseTaskDataSource source = new PassiveDatabaseTaskDataSource();
+//        source.setDbUtil(allenDbUtil());
+//        source.setQueryInterval(1000);
+//        source.setUngetBehavior(xperUngetPolicy());
+//        source.setUngetTaskThreshold(xperUngetTaskThreshold());
+//        return source;
+//    }
+
+    public PassiveDatabaseTaskDataSource databaseTaskDataSource() {
         return new PassiveMockDatabaseTaskDataSource();
     }
 
-    // Prevent DatabaseTaskDataSourceController from starting a DB polling thread
     @Bean
-    public TaskDataSource databaseTaskDataSource() {
-        return taskDataSource();
+    public int xperUngetTaskThreshold() {
+        return 5;
     }
 
-    // ---- No-op cache (no DB writes) ----
-
-    @Bean
-    public TaskDoneCache taskDoneCache() {
-        return new TaskDoneCache() {
-            public void put(org.xper.experiment.ExperimentTask t, long ts, boolean partial) {}
-            public void flush() {}
-        };
+    @Bean(scope = DefaultScopes.PROTOTYPE)
+    public UngetPolicy xperUngetPolicy() {
+        return UngetPolicy.valueOf(baseConfig.systemVariableContainer().get("xper_unget_policy", 0));
     }
 
-    // ---- Hardcoded slide params ----
-
-//    @Bean(scope = DefaultScopes.PROTOTYPE)
-//    public Integer xperSlidePerTrial() { return 2; }
+    @Bean(scope = DefaultScopes.PROTOTYPE)
+    public List<ExperimentEventListener> experimentEventListeners() {
+        List<ExperimentEventListener> listeners = new LinkedList<>();
+        listeners.add(classicConfig.messageDispatcher());
+        listeners.add(classicConfig.databaseTaskDataSourceController());
+        listeners.add(classicConfig.messageDispatcherController());
+        listeners.add(classicConfig.dataAcqController());
+        listeners.add(classicConfig.eyeZeroLogger());
+        listeners.add(classicConfig.experimentCpuBinder());
+        listeners.add(classicConfig.systemVarLogger());
+        listeners.add(intanRecordingController());
+        return listeners;
+    }
 
     @Bean(scope = DefaultScopes.PROTOTYPE)
-    public Integer xperSlideLength() { return 1000; }        // ms
+    public List<TrialEventListener> trialEventListeners() {
+        List<TrialEventListener> listeners = new LinkedList<>();
+        listeners.add(classicConfig.eyeMonitorController());
+        listeners.add(classicConfig.trialEventLogger());
+        listeners.add(classicConfig.experimentProfiler());
+        listeners.add(classicConfig.messageDispatcher());
+        listeners.add(classicConfig.trialSyncController());
+        listeners.add(classicConfig.dataAcqController());
+        listeners.add(classicConfig.jvmManager());
+        listeners.add(intanRecordingController());
+        if (!acqConfig.acqDriverName.equalsIgnoreCase(acqConfig.DAQ_NONE)) {
+            listeners.add(classicConfig.dynamicJuiceUpdater());
+        }
+        return listeners;
+    }
 
     @Bean(scope = DefaultScopes.PROTOTYPE)
-    public Integer xperInterSlideInterval() { return 1000; } // ms delay
+    public Integer xperSlideLength() {
+        return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_slide_length", 0));
+    }
+
+    @Bean(scope = DefaultScopes.PROTOTYPE)
+    public Integer xperInterSlideInterval() {
+        return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_inter_slide_interval", 0));
+    }
 }
