@@ -8,8 +8,16 @@ import org.springframework.config.java.plugin.context.AnnotationDrivenConfig;
 import org.springframework.config.java.util.DefaultScopes;
 import org.xper.acq.mock.SocketSamplingDeviceServer;
 import org.xper.allen.app.fixation.PngScene;
+import org.xper.allen.drawing.LeftRightScreenMarker;
+import org.xper.allen.nafc.experiment.NAFCMarkStimAndEStimTrialDrawingController;
+import org.xper.allen.nafc.experiment.NAFCTrialDrawingController;
+import org.xper.allen.nafc.experiment.ScreenShotter;
+import org.xper.allen.nafc.experiment.juice.NAFCJuiceController;
+import org.xper.allen.nafc.message.ChoiceEventListener;
 import org.xper.allen.passive.PassiveDatabaseTaskDataSource;
+import org.xper.allen.passive.PassiveMarkStimTrialDrawingController;
 import org.xper.allen.passive.PassiveSlideRunner;
+import org.xper.allen.passive.PassiveTrialDrawingController;
 import org.xper.allen.passive.mock.PassiveMockDatabaseTaskDataSource;
 import org.xper.allen.util.AllenDbUtil;
 import org.xper.config.*;
@@ -26,6 +34,7 @@ import org.xper.experiment.listener.ExperimentEventListener;
 import org.xper.classic.TrialEventListener;
 import org.xper.eye.mapping.MappingAlgorithm;
 import org.xper.intan.SlideTrialIntanRecordingController;
+import org.xper.juice.mock.NullDynamicJuice;
 
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
@@ -48,15 +57,31 @@ public class PassiveConfig {
 
     @ExternalValue("jdbc.driver")
     public String jdbcDriver;
+
     @ExternalValue("jdbc.url")
     public String jdbcUrl;
+
     @ExternalValue("jdbc.username")
     public String jdbcUserName;
+
     @ExternalValue("jdbc.password")
     public String jdbcPassword;
 
     @ExternalValue("experiment.monkey_window_fullscreen")
     public boolean monkeyWindowFullScreen;
+
+    @ExternalValue("experiment.mark_every_step")
+    public boolean markEveryStep;
+
+    @ExternalValue("screenshot.enabled")
+    public boolean screenShotEnabled;
+
+    @ExternalValue("screenshot.directory")
+    public String screenShotDirectory;
+
+    public String getJdbcUrl() {
+        return jdbcUrl;
+    }
 
     @Bean
     public AbstractRenderer experimentGLRenderer() {
@@ -227,6 +252,38 @@ public class PassiveConfig {
             listeners.add(classicConfig.dynamicJuiceUpdater());
         }
         return listeners;
+    }
+
+    @Bean
+    public PassiveTrialDrawingController drawingController() {
+        PassiveMarkStimTrialDrawingController controller;
+        controller = new PassiveMarkStimTrialDrawingController();
+
+        controller.setWindow(classicConfig.monkeyWindow());
+        controller.setTaskScene(taskScene());
+        controller.setFixationOnWithStimuli(classicConfig.xperFixationOnWithStimuli());
+        controller.setScreenShotter(screenShotter());
+        controller.setLeftRightMarker(screenMarker());
+        return controller;
+    }
+
+    @Bean
+    public LeftRightScreenMarker screenMarker() {
+        LeftRightScreenMarker leftRightScreenMarker = new LeftRightScreenMarker();
+        leftRightScreenMarker.setSize(classicConfig.xperScreenMarkerSize());
+        leftRightScreenMarker.setViewportIndex(classicConfig.xperScreenMarkerViewportIndex());
+        return leftRightScreenMarker;
+    }
+
+    @Bean
+    public ScreenShotter screenShotter(){
+        ScreenShotter screenShotter = new ScreenShotter();
+        screenShotter.setEnabled(screenShotEnabled);
+        screenShotter.setDirectory(screenShotDirectory);
+        screenShotter.setScreenWidthPixels(3840);
+        screenShotter.setScreenHeightPixels(2160);
+        return screenShotter;
+
     }
 
     @Bean(scope = DefaultScopes.PROTOTYPE)
