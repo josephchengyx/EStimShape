@@ -1,0 +1,27 @@
+package org.xper.allen.passive.mock;
+
+import org.xper.allen.passive.PassiveExperimentTask;
+import org.xper.experiment.DatabaseTaskDataSource;
+import org.xper.experiment.ExperimentTask;
+
+public class PassiveMockDatabaseTaskDataSource extends DatabaseTaskDataSource {
+    @Override
+    public PassiveExperimentTask getNextTask() {
+        return new PassiveMockExperimentTask();
+    }
+
+    @Override
+    public void ungetTask(ExperimentTask t) {
+
+    }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void stop() {
+
+    }
+}
