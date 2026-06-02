@@ -607,7 +607,7 @@ public class NAFCConfig {
 
 	@Bean(scope = DefaultScopes.PROTOTYPE)
 	public Integer xperSampleToChoiceDelayTime() {
-		return 1_000;
+		return Integer.parseInt(baseConfig.systemVariableContainer().get("xper_sample_to_choice_delay_time", 0));
 	}
 
 	@Bean(scope = DefaultScopes.PROTOTYPE)
