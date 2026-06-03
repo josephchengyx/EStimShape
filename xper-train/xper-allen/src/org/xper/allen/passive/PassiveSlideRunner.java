@@ -31,7 +31,6 @@ public class PassiveSlideRunner extends ClassicSlideRunner {
 
         try {
             // draw cue stimulus
-            drawingController.prepareSample(currentTask, currentContext);
             drawingController.showSample(currentTask, currentContext);
             TrialResult result = doSlide(0, stateObject);
             if (result != TrialResult.SLIDE_OK) {
@@ -51,7 +50,6 @@ public class PassiveSlideRunner extends ClassicSlideRunner {
             drawingController.prepareNextSlide(currentTask, currentContext);
 
             // draw match stimulus
-            drawingController.prepareMatch(currentTask, currentContext);
             drawingController.showMatch(currentTask, currentContext);
             result = doSlide(1, stateObject);
             if (result != TrialResult.SLIDE_OK) {

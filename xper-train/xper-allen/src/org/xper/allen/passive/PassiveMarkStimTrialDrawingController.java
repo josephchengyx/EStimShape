@@ -8,6 +8,10 @@ import org.xper.classic.vo.TrialContext;
 import org.xper.experiment.ExperimentTask;
 
 public class PassiveMarkStimTrialDrawingController extends MarkStimTrialDrawingController implements PassiveTrialDrawingController {
+
+    @Dependency
+    private PassiveTaskScene taskScene;
+
     @Dependency
     ScreenShotter screenShotter;
 
@@ -15,13 +19,10 @@ public class PassiveMarkStimTrialDrawingController extends MarkStimTrialDrawingC
     LeftRightScreenMarker leftRightMarker;
 
     @Override
-    public void prepareSample(PassiveExperimentTask task, TrialContext context) {
-        task.setStimSpec(task.getSampleSpec());
-    }
-
-    @Override
     public void showSample(PassiveExperimentTask task, TrialContext context) {
+        task.setStimSpec(task.getSampleSpec());
         leftRightMarker.right();
+        getTaskScene().setSample(task);
         drawTaskScene(task, context);
         getWindow().swapBuffers();
     }
@@ -34,13 +35,10 @@ public class PassiveMarkStimTrialDrawingController extends MarkStimTrialDrawingC
     }
 
     @Override
-    public void prepareMatch(PassiveExperimentTask task, TrialContext context) {
-        task.setStimSpec(task.getMatchSpec());
-    }
-
-    @Override
     public void showMatch(PassiveExperimentTask task, TrialContext context) {
+        task.setStimSpec(task.getMatchSpec());
         leftRightMarker.right();
+        getTaskScene().setMatch(task);
         drawTaskScene(task, context);
         getWindow().swapBuffers();
     }
@@ -51,6 +49,10 @@ public class PassiveMarkStimTrialDrawingController extends MarkStimTrialDrawingC
     public void prepareNextSlide(ExperimentTask task, TrialContext context) {}
     @Override
     public void slideFinish(ExperimentTask task, TrialContext context) {}
+
+    public void setTaskScene(PassiveTaskScene taskScene) { this.taskScene = taskScene; }
+
+    public PassiveTaskScene getTaskScene() { return taskScene; }
 
     public ScreenShotter getScreenShotter() {
         return screenShotter;

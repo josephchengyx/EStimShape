@@ -14,12 +14,10 @@ import org.xper.allen.nafc.experiment.NAFCTrialDrawingController;
 import org.xper.allen.nafc.experiment.ScreenShotter;
 import org.xper.allen.nafc.experiment.juice.NAFCJuiceController;
 import org.xper.allen.nafc.message.ChoiceEventListener;
-import org.xper.allen.passive.PassiveDatabaseTaskDataSource;
-import org.xper.allen.passive.PassiveMarkStimTrialDrawingController;
-import org.xper.allen.passive.PassiveSlideRunner;
-import org.xper.allen.passive.PassiveTrialDrawingController;
+import org.xper.allen.passive.*;
 import org.xper.allen.passive.mock.PassiveMockDatabaseTaskDataSource;
 import org.xper.allen.util.AllenDbUtil;
+import org.xper.classic.vo.SlideTrialExperimentState;
 import org.xper.config.*;
 import org.xper.console.ExperimentConsole;
 import org.xper.console.ExperimentConsoleModel;
@@ -165,8 +163,8 @@ public class PassiveConfig {
     }
 
     @Bean
-    public PngScene taskScene() {
-        PngScene scene = new PngScene();
+    public PassiveTaskScene taskScene() {
+        PassivePngScene scene = new PassivePngScene();
         scene.setRenderer(experimentGLRenderer());
         scene.setFixation(classicConfig.experimentFixationPoint());
         scene.setMarker(classicConfig.screenMarker());
@@ -235,6 +233,32 @@ public class PassiveConfig {
         listeners.add(classicConfig.systemVarLogger());
         listeners.add(intanRecordingController());
         return listeners;
+    }
+
+    @Bean
+    public SlideTrialExperimentState experimentState () {
+        SlideTrialExperimentState state = new SlideTrialExperimentState ();
+        state.setLocalTimeUtil(baseConfig.localTimeUtil());
+        state.setTrialEventListeners(trialEventListeners());
+        state.setSlideEventListeners(classicConfig.slideEventListeners());
+        state.setEyeController(classicConfig.eyeController());
+        state.setExperimentEventListeners(experimentEventListeners());
+        state.setTaskDataSource(taskDataSource());
+        state.setTaskDoneCache(classicConfig.taskDoneCache());
+        state.setGlobalTimeClient(acqConfig.timeClient());
+        state.setDrawingController(drawingController());
+        state.setInterTrialInterval(classicConfig.xperInterTrialInterval());
+        state.setTimeBeforeFixationPointOn(classicConfig.xperTimeBeforeFixationPointOn());
+        state.setTimeAllowedForInitialEyeIn(classicConfig.xperTimeAllowedForInitialEyeIn());
+        state.setRequiredEyeInHoldTime(classicConfig.xperRequiredEyeInHoldTime());
+        state.setSlidePerTrial(classicConfig.xperSlidePerTrial());
+        state.setSlideLength(xperSlideLength());
+        state.setInterSlideInterval(xperInterSlideInterval());
+        state.setDoEmptyTask(classicConfig.xperDoEmptyTask());
+        state.setSleepWhileWait(true);
+        state.setPause(classicConfig.xperExperimentInitialPause());
+        state.setDelayAfterTrialComplete(classicConfig.xperDelayAfterTrialComplete());
+        return state;
     }
 
     @Bean(scope = DefaultScopes.PROTOTYPE)

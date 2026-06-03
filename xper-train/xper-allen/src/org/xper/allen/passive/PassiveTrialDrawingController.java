@@ -5,9 +5,7 @@ import org.xper.classic.TrialDrawingController;
 import org.xper.classic.vo.TrialContext;
 
 public interface PassiveTrialDrawingController extends TrialDrawingController {
-    void prepareSample(PassiveExperimentTask task, TrialContext context);
     void showSample(PassiveExperimentTask task, TrialContext context);
     void showDelay(PassiveExperimentTask task, TrialContext context);
-    void prepareMatch(PassiveExperimentTask task, TrialContext context);
     void showMatch(PassiveExperimentTask task, TrialContext context);
 }
