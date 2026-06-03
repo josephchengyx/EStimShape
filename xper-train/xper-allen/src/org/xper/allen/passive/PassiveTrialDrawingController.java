@@ -1,6 +1,5 @@
 package org.xper.allen.passive;
 
-import org.xper.allen.app.fixation.PngScene;
 import org.xper.classic.TrialDrawingController;
 import org.xper.classic.vo.TrialContext;
 
