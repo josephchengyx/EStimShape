@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.xper.allen.passive.PassiveExperimentTask;
+import org.xper.allen.specs.PassiveStimSpecSpec;
 import org.xper.util.DbUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -359,6 +360,46 @@ public class AllenDbUtil extends DbUtil {
 	public LinkedList<PassiveExperimentTask> readPassiveExperimentTasks(long genId,
 																  long lastDoneTaskId) {
 		final LinkedList<PassiveExperimentTask> taskToDo = new LinkedList<PassiveExperimentTask>();
+		JdbcTemplate jt = new JdbcTemplate(dataSource);
+		jt.query(
+				" select t.task_id, t.stim_id, t.xfm_id, t.gen_id, " +
+						" (select spec from StimSpec s where s.id = t.stim_id ) as stim_spec, " +
+						" (select spec from XfmSpec x where x.id = t.xfm_id) as xfm_spec " +
+						" from TaskToDo t " +
+						" where t.gen_id = ? and t.task_id > ? " +
+						" order by t.task_id",
+				new Object[] { genId, lastDoneTaskId },
+				new RowCallbackHandler() {
+					public void processRow(ResultSet rs) throws SQLException {
+						StimSpecEntry sse;
+						//AC
+						//System.out.println(Long.toString(lastDoneTaskId));
+						sse = readStimSpec(rs.getLong("stim_id"));
+
+
+
+						StimSpecEntryUtil sseU = new StimSpecEntryUtil(sse);
+
+						PassiveExperimentTask task = new PassiveExperimentTask();
+
+						task.setGenId(rs.getLong("gen_id"));
+						//Serializing StimSpec
+						//sse.setSpec(rs.getString("stim_spec"));
+						PassiveStimSpecSpec ss = sseU.passiveStimSpecSpecFromXmlSpec();
+						//StimObjData
+						//task.setStimId(readStimObjData(ss.getSampleObjData()).getStimId());
+						task.setSampleSpecId(ss.getSampleObjData());
+						task.setMatchSpecId(ss.getMatchObjData());
+						task.setSampleSpec(readStimObjData(ss.getSampleObjData()).getSpec());
+						task.setMatchSpec(readStimObjData(ss.getMatchObjData()).getSpec());
+						task.setStimSpec(sse.getSpec());
+						task.setStimId(sse.getStimId());
+
+						task.setTaskId(rs.getLong("task_id"));
+						task.setXfmId(rs.getLong("xfm_id"));
+						task.setXfmSpec(rs.getString("xfm_spec"));
+						taskToDo.add(task);
+					}});
 		return taskToDo;
 	}
 

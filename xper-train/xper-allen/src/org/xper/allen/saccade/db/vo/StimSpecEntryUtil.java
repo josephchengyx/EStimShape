@@ -1,5 +1,6 @@
 package org.xper.allen.saccade.db.vo;
 
+import org.xper.allen.specs.PassiveStimSpecSpec;
 import org.xper.allen.specs.SaccadeStimSpecSpec;
 import org.xper.allen.specs.NAFCStimSpecSpec;
 import org.xper.db.vo.StimSpecEntry;
@@ -35,6 +36,11 @@ public class StimSpecEntryUtil{
 	
 	public NAFCStimSpecSpec NAFCStimSpecSpecFromXmlSpec() {
 		NAFCStimSpecSpec ss = NAFCStimSpecSpec.fromXml(stimSpecEntry.getSpec());
+		return ss;
+	}
+
+	public PassiveStimSpecSpec passiveStimSpecSpecFromXmlSpec() {
+		PassiveStimSpecSpec ss = PassiveStimSpecSpec.fromXml(stimSpecEntry.getSpec());
 		return ss;
 	}
 	
