@@ -8,7 +8,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.xper.allen.passive.PassiveExperimentTask;
+import org.xper.allen.passive.experiment.PassiveExperimentTask;
 import org.xper.allen.specs.PassiveStimSpecSpec;
 import org.xper.util.DbUtil;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -401,6 +401,17 @@ public class AllenDbUtil extends DbUtil {
 						taskToDo.add(task);
 					}});
 		return taskToDo;
+	}
+
+	public LinkedList<String[]> readAssociatePairs() {
+		final LinkedList<String[]> pairs = new LinkedList<>();
+		JdbcTemplate jt = new JdbcTemplate(dataSource);
+		jt.query(" select t.sample_path, t.match_path " +
+						" from AssociatePairLibrary t ",
+				(rs, row) ->
+						new String[]{rs.getString("sample_path"), rs.getString("match_path")}
+		);
+		return pairs;
 	}
 
     /**
