@@ -1,4 +1,4 @@
-package org.xper.allen.passive;
+package org.xper.allen.passive.experiment;
 
 import org.xper.classic.TrialDrawingController;
 import org.xper.classic.vo.TrialContext;

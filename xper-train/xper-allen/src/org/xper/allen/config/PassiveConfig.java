@@ -7,12 +7,10 @@ import org.springframework.config.java.annotation.valuesource.SystemPropertiesVa
 import org.springframework.config.java.plugin.context.AnnotationDrivenConfig;
 import org.springframework.config.java.util.DefaultScopes;
 import org.xper.acq.mock.SocketSamplingDeviceServer;
-import org.xper.allen.app.fixation.PngScene;
 import org.xper.allen.drawing.LeftRightScreenMarker;
 import org.xper.allen.nafc.experiment.ScreenShotter;
-import org.xper.allen.nafc.message.ChoiceEventListener;
-import org.xper.allen.passive.*;
-import org.xper.allen.passive.mock.PassiveMockDatabaseTaskDataSource;
+import org.xper.allen.passive.blockgen.PassiveMockDatabaseTaskDataSource;
+import org.xper.allen.passive.experiment.*;
 import org.xper.allen.util.AllenDbUtil;
 import org.xper.classic.vo.SlideTrialExperimentState;
 import org.xper.config.*;
@@ -29,7 +27,6 @@ import org.xper.experiment.listener.ExperimentEventListener;
 import org.xper.classic.TrialEventListener;
 import org.xper.eye.mapping.MappingAlgorithm;
 import org.xper.intan.SlideTrialIntanRecordingController;
-import org.xper.juice.mock.NullDynamicJuice;
 
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;

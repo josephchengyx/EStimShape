@@ -1,7 +1,7 @@
-package org.xper.allen.passive.mock;
+package org.xper.allen.passive.experiment.mock;
 
-import org.xper.allen.passive.PassiveDatabaseTaskDataSource;
-import org.xper.allen.passive.PassiveExperimentTask;
+import org.xper.allen.passive.experiment.PassiveDatabaseTaskDataSource;
+import org.xper.allen.passive.experiment.PassiveExperimentTask;
 import org.xper.experiment.ExperimentTask;
 
 public class PassiveMockDatabaseTaskDataSource extends PassiveDatabaseTaskDataSource {

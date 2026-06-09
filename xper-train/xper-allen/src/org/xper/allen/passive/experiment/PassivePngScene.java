@@ -1,4 +1,4 @@
-package org.xper.allen.passive;
+package org.xper.allen.passive.experiment;
 
 import org.lwjgl.opengl.GL11;
 import org.xper.Dependency;

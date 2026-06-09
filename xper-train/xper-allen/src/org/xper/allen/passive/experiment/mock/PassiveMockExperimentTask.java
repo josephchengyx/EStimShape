@@ -1,6 +1,6 @@
-package org.xper.allen.passive.mock;
+package org.xper.allen.passive.experiment.mock;
 
-import org.xper.allen.passive.PassiveExperimentTask;
+import org.xper.allen.passive.experiment.PassiveExperimentTask;
 
 import java.io.IOException;
 import java.nio.file.Files;
