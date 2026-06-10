@@ -17,7 +17,7 @@ public class PassiveConsole {
 			throw new XGLException(e);
 		}
 		JavaConfigApplicationContext context = new JavaConfigApplicationContext(
-				FileUtil.loadConfigClass("experiment.config_class"));
+				FileUtil.loadConfigClass("experiment.passive.config_class"));
 		ExperimentConsole console = context.getBean(ExperimentConsole.class);
 		console.run();
 	}

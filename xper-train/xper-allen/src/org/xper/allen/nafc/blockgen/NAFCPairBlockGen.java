@@ -11,7 +11,6 @@ import org.xper.rfplot.drawing.png.PngSpec;
 import org.xper.time.TimeUtil;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.xper.allen.nafc.blockgen.NAFCCoordinateAssigner.inclusiveRandomDouble;
 
@@ -68,7 +67,10 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
             int[] rewardList  = {correctChoice};
 
             //Handling shuffling & removing Match from possible distractors
-            List<String> distractorList = pairList.stream().map(entry -> entry[0]).collect(Collectors.toList());
+            List<String> distractorList = new ArrayList<>();
+            for (String[] entry: pairList) {
+                distractorList.add(entry[0]);
+            }
             distractorList.remove(samplePath);
             distractorList.remove(matchPath);
             Collections.shuffle(distractorList);

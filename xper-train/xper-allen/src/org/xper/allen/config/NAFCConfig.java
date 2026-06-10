@@ -19,6 +19,7 @@ import org.xper.acq.mock.SocketSamplingDeviceServer;
 import org.xper.allen.drawing.LeftRightScreenMarker;
 import org.xper.allen.intan.NAFCDigitalTriggerIntanStimulationRecordingController;
 import org.xper.allen.nafc.NAFCPngScene;
+import org.xper.allen.nafc.blockgen.NAFCPairBlockGen;
 import org.xper.allen.nafc.experiment.*;
 import org.xper.allen.nafc.eye.NAFCEyeMonitorController;
 import org.xper.allen.nafc.experiment.mock.NAFCMockDatabaseTaskDataSource;
@@ -256,19 +257,27 @@ public class NAFCConfig {
 		return source;
 	}
 
+	@Bean
+	public NAFCDatabaseTaskDataSource databaseTaskDataSource() {
+		NAFCDatabaseTaskDataSource source = new NAFCDatabaseTaskDataSource();
+		source.setDbUtil(allenDbUtil());
+		source.setQueryInterval(1000);
+		source.setUngetBehavior(xperUngetPolicy());
+		source.setUngetTaskThreshold(xperUngetTaskThreshold());
+		return source;
+	}
+
 //	@Bean
 //	public NAFCDatabaseTaskDataSource databaseTaskDataSource() {
-//		NAFCDatabaseTaskDataSource source = new NAFCDatabaseTaskDataSource();
-//		source.setDbUtil(allenDbUtil());
-//		source.setQueryInterval(1000);
-//		source.setUngetBehavior(xperUngetPolicy());
-//		source.setUngetTaskThreshold(xperUngetTaskThreshold());
-//		return source;
+//		return new NAFCMockDatabaseTaskDataSource();
 //	}
 
 	@Bean
-	public NAFCDatabaseTaskDataSource databaseTaskDataSource() {
-		return new NAFCMockDatabaseTaskDataSource();
+	public NAFCPairBlockGen pairBlockGen() {
+		NAFCPairBlockGen generator = new NAFCPairBlockGen();
+		generator.setDbUtil(allenDbUtil());
+		generator.setGlobalTimeUtil(acqConfig.timeClient());
+		return generator;
 	}
 
 	@Bean

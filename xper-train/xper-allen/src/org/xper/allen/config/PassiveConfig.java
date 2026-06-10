@@ -9,6 +9,7 @@ import org.springframework.config.java.util.DefaultScopes;
 import org.xper.acq.mock.SocketSamplingDeviceServer;
 import org.xper.allen.drawing.LeftRightScreenMarker;
 import org.xper.allen.nafc.experiment.ScreenShotter;
+import org.xper.allen.passive.blockgen.PassivePairBlockGen;
 import org.xper.allen.passive.experiment.mock.PassiveMockDatabaseTaskDataSource;
 import org.xper.allen.passive.experiment.*;
 import org.xper.allen.util.AllenDbUtil;
@@ -191,28 +192,26 @@ public class PassiveConfig {
         return databaseTaskDataSource();
     }
 
-//    @Bean
+    @Bean
+    public PassiveDatabaseTaskDataSource databaseTaskDataSource() {
+        PassiveDatabaseTaskDataSource source = new PassiveDatabaseTaskDataSource();
+        source.setDbUtil(allenDbUtil());
+        source.setQueryInterval(1000);
+        source.setUngetBehavior(xperUngetPolicy());
+        source.setUngetTaskThreshold(xperUngetTaskThreshold());
+        return source;
+    }
+
 //    public PassiveDatabaseTaskDataSource databaseTaskDataSource() {
-//        PassiveDatabaseTaskDataSource source = new PassiveDatabaseTaskDataSource();
-//        source.setDbUtil(allenDbUtil());
-//        source.setQueryInterval(1000);
-//        source.setUngetBehavior(xperUngetPolicy());
-//        source.setUngetTaskThreshold(xperUngetTaskThreshold());
-//        return source;
+//        return new PassiveMockDatabaseTaskDataSource();
 //    }
 
-    public PassiveDatabaseTaskDataSource databaseTaskDataSource() {
-        return new PassiveMockDatabaseTaskDataSource();
-    }
-
     @Bean
-    public int xperUngetTaskThreshold() {
-        return 5;
-    }
-
-    @Bean(scope = DefaultScopes.PROTOTYPE)
-    public UngetPolicy xperUngetPolicy() {
-        return UngetPolicy.valueOf(baseConfig.systemVariableContainer().get("xper_unget_policy", 0));
+    public PassivePairBlockGen pairBlockGen() {
+        PassivePairBlockGen generator = new PassivePairBlockGen();
+        generator.setDbUtil(allenDbUtil());
+        generator.setGlobalTimeUtil(acqConfig.timeClient());
+        return generator;
     }
 
     @Bean(scope = DefaultScopes.PROTOTYPE)
@@ -301,7 +300,16 @@ public class PassiveConfig {
         screenShotter.setScreenWidthPixels(3840);
         screenShotter.setScreenHeightPixels(2160);
         return screenShotter;
+    }
 
+    @Bean
+    public int xperUngetTaskThreshold() {
+        return 5;
+    }
+
+    @Bean(scope = DefaultScopes.PROTOTYPE)
+    public UngetPolicy xperUngetPolicy() {
+        return UngetPolicy.valueOf(baseConfig.systemVariableContainer().get("xper_unget_policy", 0));
     }
 
     @Bean(scope = DefaultScopes.PROTOTYPE)

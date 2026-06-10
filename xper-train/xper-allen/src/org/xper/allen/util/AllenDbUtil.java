@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -407,13 +408,12 @@ public class AllenDbUtil extends DbUtil {
 	public LinkedList<String[]> readAssociatePairs() {
 		final LinkedList<String[]> pairs = new LinkedList<>();
 		JdbcTemplate jt = new JdbcTemplate(dataSource);
-		jt.query(" select t.sample_path, t.match_path " +
-						" from AssociatePairLibrary t ",
+		List<String[]> result = jt.query(" select t.sample_path, t.match_path from AssociatePairLibrary t ",
 				new RowMapper() {
 					public String[] mapRow(ResultSet rs, int rowNum) throws SQLException {
 						return new String[]{rs.getString("sample_path"), rs.getString("match_path")};
 					}});
-		return pairs;
+		return new LinkedList<>(result);
 	}
 
     /**
