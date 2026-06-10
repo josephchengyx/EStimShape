@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.core.RowMapper;
 import org.xper.allen.passive.experiment.PassiveExperimentTask;
 import org.xper.allen.specs.PassiveStimSpecSpec;
 import org.xper.util.DbUtil;
@@ -408,9 +409,10 @@ public class AllenDbUtil extends DbUtil {
 		JdbcTemplate jt = new JdbcTemplate(dataSource);
 		jt.query(" select t.sample_path, t.match_path " +
 						" from AssociatePairLibrary t ",
-				(rs, row) ->
-						new String[]{rs.getString("sample_path"), rs.getString("match_path")}
-		);
+				new RowMapper() {
+					public String[] mapRow(ResultSet rs, int rowNum) throws SQLException {
+						return new String[]{rs.getString("sample_path"), rs.getString("match_path")};
+					}});
 		return pairs;
 	}
 

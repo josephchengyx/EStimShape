@@ -9,7 +9,7 @@ import org.springframework.config.java.util.DefaultScopes;
 import org.xper.acq.mock.SocketSamplingDeviceServer;
 import org.xper.allen.drawing.LeftRightScreenMarker;
 import org.xper.allen.nafc.experiment.ScreenShotter;
-import org.xper.allen.passive.blockgen.PassiveMockDatabaseTaskDataSource;
+import org.xper.allen.passive.experiment.mock.PassiveMockDatabaseTaskDataSource;
 import org.xper.allen.passive.experiment.*;
 import org.xper.allen.util.AllenDbUtil;
 import org.xper.classic.vo.SlideTrialExperimentState;
