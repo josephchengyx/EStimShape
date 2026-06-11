@@ -10,8 +10,15 @@ public class ConvertToRGBA {
     static int tolerance = 30;
 
     public static void main(String[] args) throws Exception {
-        for (String path : args) {
-            BufferedImage src = ImageIO.read(new File(path));
+        File dir = new File(args[0]);
+        File[] pngFiles = dir.listFiles(new java.io.FilenameFilter() {
+            public boolean accept(File d, String name) {
+                return name.toLowerCase().endsWith(".png");
+            }
+        });
+
+        for (File file : pngFiles) {
+            BufferedImage src = ImageIO.read(file);
 
             BufferedImage rgba;
             if (src.getType() == BufferedImage.TYPE_4BYTE_ABGR) {
@@ -30,8 +37,8 @@ public class ConvertToRGBA {
                 }
             }
 
-            ImageIO.write(rgba, "png", new File(path));
-            System.out.println("Converted: " + path);
+            ImageIO.write(rgba, "png", file);
+            System.out.println("Converted: " + file.getPath());
         }
     }
 
