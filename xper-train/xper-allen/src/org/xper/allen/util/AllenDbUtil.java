@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.RowMapper;
+import org.xper.Dependency;
 import org.xper.allen.passive.experiment.PassiveExperimentTask;
 import org.xper.allen.specs.PassiveStimSpecSpec;
 import org.xper.util.DbUtil;
@@ -40,6 +41,17 @@ public class AllenDbUtil extends DbUtil {
 		this.dataSource = dataSource;
 	}
 */
+
+	@Dependency
+	DataSource stimlibDataSource;
+
+	public DataSource getStimlibDataSource() {
+		return stimlibDataSource;
+	}
+
+	public void setStimlibDataSource(DataSource stimlibDataSource) {
+		this.stimlibDataSource = stimlibDataSource;
+	}
 
 	/**
 	 * Before DbUtil can be used. DataSource must be set.
@@ -406,8 +418,7 @@ public class AllenDbUtil extends DbUtil {
 	}
 
 	public LinkedList<String[]> readAssociatePairs() {
-		final LinkedList<String[]> pairs = new LinkedList<>();
-		JdbcTemplate jt = new JdbcTemplate(dataSource);
+		JdbcTemplate jt = new JdbcTemplate(stimlibDataSource);
 		List<String[]> result = jt.query(" select t.sample_path, t.match_path from AssociatePairLibrary t ",
 				new RowMapper() {
 					public String[] mapRow(ResultSet rs, int rowNum) throws SQLException {

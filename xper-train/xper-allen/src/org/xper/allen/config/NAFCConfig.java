@@ -79,6 +79,9 @@ public class NAFCConfig {
 	@ExternalValue("jdbc.url")
 	public String jdbcUrl;
 
+	@ExternalValue("stimlib.jdbc.url")
+	public String stimlibJdbcUrl;
+
 	@ExternalValue("jdbc.username")
 	public String jdbcUserName;
 
@@ -123,6 +126,7 @@ public class NAFCConfig {
 	public AllenDbUtil allenDbUtil() {
 		AllenDbUtil dbUtil = new AllenDbUtil();
 		dbUtil.setDataSource(dataSource());
+		dbUtil.setStimlibDataSource(stimlibDataSource());
 		return dbUtil;
 	}
 
@@ -252,6 +256,20 @@ public class NAFCConfig {
 			throw new DbException(e);
 		}
 		source.setJdbcUrl(jdbcUrl);
+		source.setUser(jdbcUserName);
+		source.setPassword(jdbcPassword);
+		return source;
+	}
+
+	@Bean
+	public DataSource stimlibDataSource() {
+		ComboPooledDataSource source = new ComboPooledDataSource();
+		try {
+			source.setDriverClass(jdbcDriver);
+		} catch (PropertyVetoException e) {
+			throw new DbException(e);
+		}
+		source.setJdbcUrl(stimlibJdbcUrl);
 		source.setUser(jdbcUserName);
 		source.setPassword(jdbcPassword);
 		return source;
