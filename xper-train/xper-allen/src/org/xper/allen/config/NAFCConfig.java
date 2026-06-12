@@ -577,7 +577,7 @@ public class NAFCConfig {
 
 	@Bean(scope = DefaultScopes.PROTOTYPE)
 	public Boolean xperShowAnswer(){
-		return true;
+		return Boolean.parseBoolean(baseConfig.systemVariableContainer().get("xper_nafc_show_answer",0));
 	}
 
 	@Bean(scope = DefaultScopes.PROTOTYPE)
