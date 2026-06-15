@@ -417,9 +417,20 @@ public class AllenDbUtil extends DbUtil {
 		return taskToDo;
 	}
 
-	public LinkedList<String[]> readAssociatePairs() {
+	public LinkedList<String[]> readAssociatePairs(String taskType) {
 		JdbcTemplate jt = new JdbcTemplate(stimlibDataSource);
-		List<String[]> result = jt.query(" select t.sample_path, t.match_path from AssociatePairLibrary t ",
+		String table;
+		switch (taskType.toLowerCase()) {
+			case "passive":
+				table = "PassivePairLibrary";
+				break;
+			case "nafc":
+				table = "NAFCPairLibrary";
+				break;
+			default:
+				return new LinkedList<String[]>();
+		}
+		List<String[]> result = jt.query(" select t.sample_path, t.match_path from " + table + " t ",
 				new RowMapper() {
 					public String[] mapRow(ResultSet rs, int rowNum) throws SQLException {
 						return new String[]{rs.getString("sample_path"), rs.getString("match_path")};

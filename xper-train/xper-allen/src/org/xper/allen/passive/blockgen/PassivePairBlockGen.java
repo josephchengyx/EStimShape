@@ -20,7 +20,7 @@ public class PassivePairBlockGen extends AbstractTrialGenerator {
     long genId = 1;
 
     public void generate(int numTrials, double width, double height) {
-        List<String[]> pairs = dbUtil.readAssociatePairs();
+        List<String[]> pairs = dbUtil.readAssociatePairs("passive");
         Collections.shuffle(pairs);
         //FIXED-PARAMETERS
         //int numTrials = 100;

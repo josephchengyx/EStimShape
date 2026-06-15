@@ -31,7 +31,7 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
                          double distractorScaleLowerLim, double distractorScaleUpperLim
                          ) {
 
-        List<String[]> pairList = dbUtil.readAssociatePairs();
+        List<String[]> pairList = dbUtil.readAssociatePairs("nafc");
         List<String[]> pairs = new LinkedList<>(pairList);
         Collections.shuffle(pairs);
         //FIXED-PARAMETERS
