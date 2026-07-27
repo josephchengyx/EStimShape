@@ -105,11 +105,9 @@ public class NAFCMarkStimAndEStimTrialDrawingController extends MarkStimTrialDra
 	}
 
 	public void showMatch(NAFCExperimentTask task, NAFCTrialContext context) {
-		int[] correct = task.getRewardList();
-
-		if(task != null && correct.length > 0) {
+		if(task != null && task.getRewardList().length > 0) {
 			leftRightMarker.right();
-			getTaskScene().drawChoice(context, false, correct[0]);
+			getTaskScene().drawChoice(context, false, task.getRewardList()[0]);
 		} else {
 			getTaskScene().drawBlank(context, false, false);
 		}
@@ -118,11 +116,10 @@ public class NAFCMarkStimAndEStimTrialDrawingController extends MarkStimTrialDra
 
 	@Override
 	public void showAnswer(NAFCExperimentTask task, NAFCTrialContext context) {
-		int[] correct = task.getRewardList();
-
-		if(task != null && correct.length > 0) {
+		if(task != null && task.getRewardList().length > 0) {
 			leftRightMarker.left();
-			getTaskScene().drawChoice(context, false, correct[0]);
+			getTaskScene().drawChoice(context, false, task.getRewardList()[0]);
+			screenShotter.takeScreenShot(String.valueOf(task.getStimId()) + "_match");
 		} else {
 			getTaskScene().drawBlank(context, false, false);
 		}

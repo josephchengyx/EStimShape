@@ -20,26 +20,40 @@ public class PassiveMarkStimTrialDrawingController extends MarkStimTrialDrawingC
 
     @Override
     public void showSample(PassiveExperimentTask task, TrialContext context) {
-        task.setStimSpec(task.getSampleSpec());
-        leftRightMarker.right();
-        getTaskScene().setSample(task);
-        drawTaskScene(task, context);
+        if (task != null) {
+            task.setStimSpec(task.getSampleSpec());
+            leftRightMarker.right();
+            getTaskScene().setSample(task);
+            drawTaskScene(task, context);
+            screenShotter.takeScreenShot(String.valueOf(task.getStimId()) + "_sample");
+        } else {
+            getTaskScene().drawBlank(context, false, false);
+        }
         getWindow().swapBuffers();
     }
 
     @Override
     public void showDelay(PassiveExperimentTask task, TrialContext context) {
-        leftRightMarker.left();
-        getTaskScene().drawBlank(context, true, true);
+        if (task != null) {
+            leftRightMarker.left();
+            getTaskScene().drawBlank(context, true, true);
+        } else {
+            getTaskScene().drawBlank(context, false, false);
+        }
         getWindow().swapBuffers();
     }
 
     @Override
     public void showMatch(PassiveExperimentTask task, TrialContext context) {
-        task.setStimSpec(task.getMatchSpec());
-        leftRightMarker.right();
-        getTaskScene().setMatch(task);
-        drawTaskScene(task, context);
+        if (task != null) {
+            task.setStimSpec(task.getMatchSpec());
+            leftRightMarker.right();
+            getTaskScene().setMatch(task);
+            drawTaskScene(task, context);
+            screenShotter.takeScreenShot(String.valueOf(task.getStimId()) + "_match");
+        } else {
+            getTaskScene().drawBlank(context, false, false);
+        }
         getWindow().swapBuffers();
     }
 
