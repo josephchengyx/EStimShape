@@ -29,7 +29,7 @@ public class NAFCPairGenerator {
         double distractorDistanceUpperLim = Double.parseDouble(args[10]);
         double distractorScaleLowerLim = Double.parseDouble(args[11]);
         double distractorScaleUpperLim = Double.parseDouble(args[12]);
-        double distractorPresentationDelay = Double.parseDouble(args[13]);
+        int distractorPresentationDelay = Integer.parseInt(args[13]);
 
         JavaConfigApplicationContext context = new JavaConfigApplicationContext(
                 FileUtil.loadConfigClass("experiment.config_class"));

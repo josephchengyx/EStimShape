@@ -29,7 +29,7 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
                          double alphaLowerLim, double alphaUpperLim,
                          double distractorDistanceLowerLim,  double distractorDistanceUpperLim,
                          double distractorScaleLowerLim, double distractorScaleUpperLim,
-                         double distractorPresentationDelay
+                         int distractorPresentationDelay
                          ) {
 
         List<String[]> pairList = dbUtil.readAssociatePairs("nafc");

@@ -26,7 +26,7 @@ public class NAFCStimSpecSpec {
 	//@XStreamAlias("rewardPolicy")
 	protected RewardPolicy rewardPolicy;
 	protected int[] rewardList;
-	protected double distractorPresentationDelay;
+	protected int distractorPresentationDelay;
 
 	//@XStreamAlias("eStimObjChans")
 	//protected int[] eStimObjChans;
@@ -51,7 +51,7 @@ public class NAFCStimSpecSpec {
 	}
 
 	public NAFCStimSpecSpec(Coordinates2D[] targetEyeWinCoords, double targetEyeWinSize[], long sampleObjData,
-			long[] choiceObjData, long[] eStimObjData, RewardPolicy rewardPolicy, int[] rewardList, double distractorPresentationDelay) {
+			long[] choiceObjData, long[] eStimObjData, RewardPolicy rewardPolicy, int[] rewardList, int distractorPresentationDelay) {
 		this.targetEyeWinCoords = targetEyeWinCoords;
 		this.targetEyeWinSize = targetEyeWinSize;
 		this.sampleObjData = sampleObjData;
@@ -173,11 +173,11 @@ public class NAFCStimSpecSpec {
 		this.stimType = stimType;
 	}
 
-	public double getDistractorPresentationDelay() {
+	public int getDistractorPresentationDelay() {
 		return distractorPresentationDelay;
 	}
 
-	public void setDistractorPresentationDelay(double distractorPresentationDelay) {
+	public void setDistractorPresentationDelay(int distractorPresentationDelay) {
 		this.distractorPresentationDelay = distractorPresentationDelay;
 	}
 }

@@ -202,7 +202,7 @@ public class ClassicNAFCTaskRunner implements NAFCTaskRunner {
         } while(timeUtil.currentTimeMicros()<sampleOffLocalTime + stateObject.getSampleToChoiceDelayTime()* 1000L);
 
         //SHOW MATCH FIRST (training only)
-        double distractorPresentationDelay = currentTask.getDistractorPresentationDelay();
+        int distractorPresentationDelay = currentTask.getDistractorPresentationDelay();
         if (distractorPresentationDelay > 0) {
             drawingController.showMatch(currentTask, currentContext);
             long matchOnLocalTime = timeUtil.currentTimeMicros();
