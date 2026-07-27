@@ -21,6 +21,7 @@ public class NAFCExperimentTask extends ExperimentTask {
 	long[] choiceSpecId;
 	RewardPolicy rewardPolicy;
 	int[] rewardList;
+	double distractorPresentationDelay;
 
 
 	public String getSampleSpec() {
@@ -110,6 +111,11 @@ public class NAFCExperimentTask extends ExperimentTask {
 		this.rewardList = rewardList;
 	}
 
+	public double getDistractorPresentationDelay() {
+		return distractorPresentationDelay;
+	}
 
-
+	public void setDistractorPresentationDelay(double distractorPresentationDelay) {
+		this.distractorPresentationDelay = distractorPresentationDelay;
+	}
 }

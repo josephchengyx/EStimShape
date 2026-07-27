@@ -26,6 +26,7 @@ public class NAFCStimSpecSpec {
 	//@XStreamAlias("rewardPolicy")
 	protected RewardPolicy rewardPolicy;
 	protected int[] rewardList;
+	protected double distractorPresentationDelay;
 
 	//@XStreamAlias("eStimObjChans")
 	//protected int[] eStimObjChans;
@@ -47,6 +48,18 @@ public class NAFCStimSpecSpec {
 		this.eStimObjData = eStimObjData;
 		this.rewardPolicy = rewardPolicy;
 		this.rewardList = rewardList;
+	}
+
+	public NAFCStimSpecSpec(Coordinates2D[] targetEyeWinCoords, double targetEyeWinSize[], long sampleObjData,
+			long[] choiceObjData, long[] eStimObjData, RewardPolicy rewardPolicy, int[] rewardList, double distractorPresentationDelay) {
+		this.targetEyeWinCoords = targetEyeWinCoords;
+		this.targetEyeWinSize = targetEyeWinSize;
+		this.sampleObjData = sampleObjData;
+		this.choiceObjData = choiceObjData;
+		this.eStimObjData = eStimObjData;
+		this.rewardPolicy = rewardPolicy;
+		this.rewardList = rewardList;
+		this.distractorPresentationDelay = distractorPresentationDelay;
 	}
 
 	public NAFCStimSpecSpec(String stimType, Coordinates2D[] targetEyeWinCoords, double targetEyeWinSize[], long sampleObjData,
@@ -158,5 +171,13 @@ public class NAFCStimSpecSpec {
 
 	public void setStimType(String stimType) {
 		this.stimType = stimType;
+	}
+
+	public double getDistractorPresentationDelay() {
+		return distractorPresentationDelay;
+	}
+
+	public void setDistractorPresentationDelay(double distractorPresentationDelay) {
+		this.distractorPresentationDelay = distractorPresentationDelay;
 	}
 }

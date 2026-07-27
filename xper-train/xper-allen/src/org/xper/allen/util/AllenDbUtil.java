@@ -356,6 +356,7 @@ public class AllenDbUtil extends DbUtil {
 						task.setRewardList(ss.getRewardList());
 						task.setTargetEyeWinCoords(ss.getTargetEyeWinCoords());
 						task.setTargetEyeWinSize(ss.getTargetEyeWinSize());
+						task.setDistractorPresentationDelay(ss.getDistractorPresentationDelay());
 						//TODO: EStimObjData
 						try{
 							task.seteStimSpec(readEStimObjData(ss.geteStimObjData()[0]).getSpec());

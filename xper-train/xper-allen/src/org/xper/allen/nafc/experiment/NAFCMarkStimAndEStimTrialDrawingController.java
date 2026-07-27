@@ -104,6 +104,18 @@ public class NAFCMarkStimAndEStimTrialDrawingController extends MarkStimTrialDra
 		getWindow().swapBuffers();
 	}
 
+	public void showMatch(NAFCExperimentTask task, NAFCTrialContext context) {
+		int[] correct = task.getRewardList();
+
+		if(task != null && correct.length > 0) {
+			leftRightMarker.right();
+			getTaskScene().drawChoice(context, false, correct[0]);
+		} else {
+			getTaskScene().drawBlank(context, false, false);
+		}
+		getWindow().swapBuffers();
+	}
+
 	@Override
 	public void showAnswer(NAFCExperimentTask task, NAFCTrialContext context) {
 		int[] correct = task.getRewardList();

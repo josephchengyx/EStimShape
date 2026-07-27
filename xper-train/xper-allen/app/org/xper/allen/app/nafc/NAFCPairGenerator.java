@@ -14,6 +14,7 @@ public class NAFCPairGenerator {
         // args 7-8    alpha for distractors (lower-upper limit)
         // args 9-10   extra distance distractors are from their default location (lower-upper limit)
         // args 11-12  distractor size scale (lower-upper limit)
+        // args 13     distractor time delay after correct choice onset (ms)
 
         int numTrials = Integer.parseInt(args[0]);
         int numChoices = Integer.parseInt(args[1]);
@@ -28,6 +29,7 @@ public class NAFCPairGenerator {
         double distractorDistanceUpperLim = Double.parseDouble(args[10]);
         double distractorScaleLowerLim = Double.parseDouble(args[11]);
         double distractorScaleUpperLim = Double.parseDouble(args[12]);
+        double distractorPresentationDelay = Double.parseDouble(args[13]);
 
         JavaConfigApplicationContext context = new JavaConfigApplicationContext(
                 FileUtil.loadConfigClass("experiment.config_class"));
@@ -41,7 +43,8 @@ public class NAFCPairGenerator {
                     choiceRadiusLowerLim, choiceRadiusUpperLim,
                     alphaLowerLim, alphaUpperLim,
                     distractorDistanceLowerLim, distractorDistanceUpperLim,
-                    distractorScaleLowerLim, distractorScaleUpperLim);
+                    distractorScaleLowerLim, distractorScaleUpperLim,
+                    distractorPresentationDelay);
 
         }
         catch(Exception e) {

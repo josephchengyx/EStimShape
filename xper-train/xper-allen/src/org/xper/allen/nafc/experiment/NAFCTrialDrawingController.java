@@ -11,6 +11,7 @@ public interface NAFCTrialDrawingController extends TrialDrawingController{
 	public void showAnswer(NAFCExperimentTask task, NAFCTrialContext context);
 	public void prepareChoice(NAFCExperimentTask task, NAFCTrialContext context);
 	public void showChoice(NAFCExperimentTask task, NAFCTrialContext context);
+	public void showMatch(NAFCExperimentTask task, NAFCTrialContext context);
 	public void animateSample(NAFCExperimentTask task, NAFCTrialContext context);
 	public void trialStart(NAFCTrialContext Context);
 	public NAFCTaskScene getTaskScene();

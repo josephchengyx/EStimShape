@@ -28,7 +28,8 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
                          double choiceRadiusLowerLim, double choiceRadiusUpperLim,
                          double alphaLowerLim, double alphaUpperLim,
                          double distractorDistanceLowerLim,  double distractorDistanceUpperLim,
-                         double distractorScaleLowerLim, double distractorScaleUpperLim
+                         double distractorScaleLowerLim, double distractorScaleUpperLim,
+                         double distractorPresentationDelay
                          ) {
 
         List<String[]> pairList = dbUtil.readAssociatePairs("nafc");
@@ -137,7 +138,8 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
                 targetEyeWinSizeArray[j] = targetEyeWinSize.get(j);
             }
 
-            NAFCStimSpecSpec stimSpec = new NAFCStimSpecSpec(targetEyeWinCoordsArray, targetEyeWinSizeArray, sampleId, choiceId, eStimObjData, rewardPolicy, rewardList);
+            NAFCStimSpecSpec stimSpec = new NAFCStimSpecSpec(targetEyeWinCoordsArray, targetEyeWinSizeArray, sampleId, choiceId,
+                    eStimObjData, rewardPolicy, rewardList, distractorPresentationDelay);
             String spec = stimSpec.toXml();
 
             dbUtil.writeStimSpec(taskId, spec);
