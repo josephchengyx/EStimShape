@@ -166,6 +166,8 @@ INSERT INTO SystemVar VALUES ('xper_fixation_point_color',1,1097009302112331,'1'
 INSERT INTO SystemVar VALUES ('xper_fixation_point_color',2,1097009302112331,'0');
 INSERT INTO SystemVar VALUES ('xper_fixation_point_size',0,1097009302112331,'5');
 INSERT INTO SystemVar VALUES ('xper_fixation_on_with_stimuli',0,1097009302112331,'true');
+INSERT INTO SystemVar VALUES ('xper_fixation_sync_channel',0,1097009302112331,'1');
+INSERT INTO SystemVar VALUES ('xper_fixation_sync_channel_reference',0,1097009302112331,'common');
 
 INSERT INTO SystemVar VALUES ('xper_screen_marker_size',0,1097009302112331,'20');
 INSERT INTO SystemVar VALUES ('xper_screen_marker_viewport_index',0,1097009302112331,'0');
