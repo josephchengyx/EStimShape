@@ -20,6 +20,7 @@ import org.xper.allen.drawing.LeftRightScreenMarker;
 import org.xper.allen.intan.NAFCDigitalTriggerIntanStimulationRecordingController;
 import org.xper.allen.nafc.NAFCPngScene;
 import org.xper.allen.nafc.blockgen.NAFCPairBlockGen;
+import org.xper.allen.nafc.blockgen.PairTrialParamDbUtil;
 import org.xper.allen.nafc.experiment.*;
 import org.xper.allen.nafc.eye.NAFCEyeMonitorController;
 import org.xper.allen.nafc.experiment.mock.NAFCMockDatabaseTaskDataSource;
@@ -296,6 +297,14 @@ public class NAFCConfig {
 		generator.setDbUtil(allenDbUtil());
 		generator.setGlobalTimeUtil(acqConfig.timeClient());
 		return generator;
+	}
+
+	@Bean
+	public PairTrialParamDbUtil pairTrialParamDbUtil() {
+		PairTrialParamDbUtil util = new PairTrialParamDbUtil();
+		util.setDataSource(dataSource());
+		util.setTableName("NAFCPairParams");
+		return util;
 	}
 
 	@Bean

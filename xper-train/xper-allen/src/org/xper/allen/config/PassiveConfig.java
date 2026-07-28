@@ -8,6 +8,7 @@ import org.springframework.config.java.plugin.context.AnnotationDrivenConfig;
 import org.springframework.config.java.util.DefaultScopes;
 import org.xper.acq.mock.SocketSamplingDeviceServer;
 import org.xper.allen.drawing.LeftRightScreenMarker;
+import org.xper.allen.nafc.blockgen.PairTrialParamDbUtil;
 import org.xper.allen.nafc.experiment.ScreenShotter;
 import org.xper.allen.passive.blockgen.PassivePairBlockGen;
 import org.xper.allen.passive.experiment.mock.PassiveMockDatabaseTaskDataSource;
@@ -230,6 +231,14 @@ public class PassiveConfig {
         generator.setDbUtil(allenDbUtil());
         generator.setGlobalTimeUtil(acqConfig.timeClient());
         return generator;
+    }
+
+    @Bean
+    public PairTrialParamDbUtil pairTrialParamDbUtil() {
+        PairTrialParamDbUtil util = new PairTrialParamDbUtil();
+        util.setDataSource(dataSource());
+        util.setTableName("PassivePairParams");
+        return util;
     }
 
     @Bean(scope = DefaultScopes.PROTOTYPE)
