@@ -439,6 +439,18 @@ public class AllenDbUtil extends DbUtil {
 		return new LinkedList<>(result);
 	}
 
+	public LinkedList<String> readStimulusLibrary() {
+		JdbcTemplate jt = new JdbcTemplate(stimlibDataSource);
+		List<String> result = jt.query(
+				" select t.stim_path from StimulusLibrary t",
+				new RowMapper() {
+					public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+						return rs.getString("stim_path");
+					}
+				});
+		return new LinkedList<>(result);
+	}
+
     /**
      * Write base matchstick stimulus spec ID for a given stimulus.
      * This links a stimulus to its base matchstick specification.

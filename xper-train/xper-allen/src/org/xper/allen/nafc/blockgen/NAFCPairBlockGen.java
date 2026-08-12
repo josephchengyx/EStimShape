@@ -32,8 +32,8 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
                          int distractorPresentationDelay
                          ) {
 
-        List<String[]> pairList = dbUtil.readAssociatePairs("nafc");
-        List<String[]> pairs = new LinkedList<>(pairList);
+        List<String> stimList = dbUtil.readStimulusLibrary();
+        List<String[]> pairs = dbUtil.readAssociatePairs("nafc");
         Collections.shuffle(pairs);
         //FIXED-PARAMETERS
         //int numTrials = 100;
@@ -69,8 +69,8 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
 
             //Handling shuffling & removing Match from possible distractors
             List<String> distractorList = new ArrayList<>();
-            for (String[] entry: pairList) {
-                distractorList.add(entry[0]);
+            for (String entry: stimList) {
+                distractorList.add(entry);
             }
             distractorList.remove(samplePath);
             distractorList.remove(matchPath);
