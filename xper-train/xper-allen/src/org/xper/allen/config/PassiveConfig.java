@@ -11,7 +11,6 @@ import org.xper.allen.drawing.LeftRightScreenMarker;
 import org.xper.allen.nafc.blockgen.PairTrialParamDbUtil;
 import org.xper.allen.nafc.experiment.ScreenShotter;
 import org.xper.allen.passive.blockgen.PassivePairBlockGen;
-import org.xper.allen.passive.experiment.mock.PassiveMockDatabaseTaskDataSource;
 import org.xper.allen.passive.experiment.*;
 import org.xper.allen.util.AllenDbUtil;
 import org.xper.classic.vo.SlideTrialExperimentState;
@@ -63,6 +62,9 @@ public class PassiveConfig {
 
     @ExternalValue("jdbc.password")
     public String jdbcPassword;
+
+    @ExternalValue("experiment.stimlib_path")
+    public String experimentStimLibPath;
 
     @ExternalValue("experiment.monkey_window_fullscreen")
     public boolean monkeyWindowFullScreen;
@@ -230,6 +232,7 @@ public class PassiveConfig {
         PassivePairBlockGen generator = new PassivePairBlockGen();
         generator.setDbUtil(allenDbUtil());
         generator.setGlobalTimeUtil(acqConfig.timeClient());
+        generator.setExperimentStimLibPath(experimentStimLibPath);
         return generator;
     }
 

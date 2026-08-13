@@ -16,11 +16,14 @@ public class PassivePairBlockGen extends AbstractTrialGenerator {
     AllenDbUtil dbUtil;
     @Dependency
     TimeUtil globalTimeUtil;
+    @Dependency
+    String experimentStimLibPath;
 
+    static final String TASK_TYPE = "passive";
     long genId = 1;
 
     public void generate(int numTrials, double width, double height) {
-        List<String[]> pairs = dbUtil.readAssociatePairs("passive");
+        List<String[]> pairs = dbUtil.readAssociatePairs(TASK_TYPE);
         Collections.shuffle(pairs);
         //FIXED-PARAMETERS
         //int numTrials = 100;
@@ -77,11 +80,20 @@ public class PassivePairBlockGen extends AbstractTrialGenerator {
     public void setDbUtil(AllenDbUtil dbUtil) {
         this.dbUtil = dbUtil;
     }
+
     public TimeUtil getGlobalTimeUtil() {
         return globalTimeUtil;
     }
 
     public void setGlobalTimeUtil(TimeUtil globalTimeUtil) {
         this.globalTimeUtil = globalTimeUtil;
+    }
+
+    public String getExperimentStimLibPath() {
+        return experimentStimLibPath;
+    }
+
+    public void setExperimentStimLibPath(String experimentStimLibPath) {
+        this.experimentStimLibPath = experimentStimLibPath;
     }
 }

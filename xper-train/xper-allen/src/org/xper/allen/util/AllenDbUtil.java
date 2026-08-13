@@ -439,10 +439,18 @@ public class AllenDbUtil extends DbUtil {
 		return new LinkedList<>(result);
 	}
 
-	public LinkedList<String> readStimulusLibrary() {
+	public LinkedList<String> readStimulusLibrary(String taskType) {
 		JdbcTemplate jt = new JdbcTemplate(stimlibDataSource);
+		String table;
+		switch (taskType.toLowerCase()) {
+			case "nafc":
+				table = "NAFCStimLibrary";
+				break;
+			default:
+				return new LinkedList<String>();
+		}
 		List<String> result = jt.query(
-				" select t.stim_path from StimulusLibrary t",
+				" select t.stim_path from " + table + " t ",
 				new RowMapper() {
 					public String mapRow(ResultSet rs, int rowNum) throws SQLException {
 						return rs.getString("stim_path");

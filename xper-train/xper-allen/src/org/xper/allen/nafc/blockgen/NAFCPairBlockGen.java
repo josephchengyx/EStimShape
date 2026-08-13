@@ -19,7 +19,10 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
     AllenDbUtil dbUtil;
     @Dependency
     TimeUtil globalTimeUtil;
+    @Dependency
+    String experimentStimLibPath;
 
+    static final String TASK_TYPE = "nafc";
     Random r = new Random();
     long genId = 1;
 
@@ -32,8 +35,8 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
                          int distractorPresentationDelay
                          ) {
 
-        List<String> stimList = dbUtil.readStimulusLibrary();
-        List<String[]> pairs = dbUtil.readAssociatePairs("nafc");
+        List<String> stimList = dbUtil.readStimulusLibrary(TASK_TYPE);
+        List<String[]> pairs = dbUtil.readAssociatePairs(TASK_TYPE);
         Collections.shuffle(pairs);
         //FIXED-PARAMETERS
         //int numTrials = 100;
@@ -69,8 +72,8 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
 
             //Handling shuffling & removing Match from possible distractors
             List<String> distractorList = new ArrayList<>();
-            for (String entry: stimList) {
-                distractorList.add(entry);
+            for (String stimPath: stimList) {
+                distractorList.add(stimPath);
             }
             distractorList.remove(samplePath);
             distractorList.remove(matchPath);
@@ -162,11 +165,20 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
     public void setDbUtil(AllenDbUtil dbUtil) {
         this.dbUtil = dbUtil;
     }
+
     public TimeUtil getGlobalTimeUtil() {
         return globalTimeUtil;
     }
 
     public void setGlobalTimeUtil(TimeUtil globalTimeUtil) {
         this.globalTimeUtil = globalTimeUtil;
+    }
+
+    public String getExperimentStimLibPath() {
+        return experimentStimLibPath;
+    }
+
+    public void setExperimentStimLibPath(String experimentStimLibPath) {
+        this.experimentStimLibPath = experimentStimLibPath;
     }
 }

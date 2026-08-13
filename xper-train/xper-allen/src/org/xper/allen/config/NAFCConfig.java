@@ -23,12 +23,10 @@ import org.xper.allen.nafc.blockgen.NAFCPairBlockGen;
 import org.xper.allen.nafc.blockgen.PairTrialParamDbUtil;
 import org.xper.allen.nafc.experiment.*;
 import org.xper.allen.nafc.eye.NAFCEyeMonitorController;
-import org.xper.allen.nafc.experiment.mock.NAFCMockDatabaseTaskDataSource;
 import org.xper.config.*;
 import org.xper.drawing.renderer.AbstractRenderer;
 import org.xper.drawing.renderer.PerspectiveRenderer;
 import org.xper.allen.intan.EStimEventListener;
-import org.xper.allen.nafc.NAFCGaussScene;
 import org.xper.allen.nafc.NAFCTaskScene;
 import org.xper.allen.nafc.console.NAFCExperimentConsole;
 import org.xper.allen.nafc.console.NAFCExperimentConsoleModel;
@@ -88,6 +86,9 @@ public class NAFCConfig {
 
 	@ExternalValue("jdbc.password")
 	public String jdbcPassword;
+
+	@ExternalValue("experiment.stimlib_path")
+	public String experimentStimLibPath;
 
 	@ExternalValue("experiment.monkey_window_fullscreen")
 	public boolean monkeyWindowFullScreen;
@@ -296,6 +297,7 @@ public class NAFCConfig {
 		NAFCPairBlockGen generator = new NAFCPairBlockGen();
 		generator.setDbUtil(allenDbUtil());
 		generator.setGlobalTimeUtil(acqConfig.timeClient());
+		generator.setExperimentStimLibPath(experimentStimLibPath);
 		return generator;
 	}
 

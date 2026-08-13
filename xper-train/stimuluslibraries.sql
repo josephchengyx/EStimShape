@@ -14,7 +14,7 @@ CREATE TABLE PassivePairLibrary (
   PRIMARY KEY  (tstamp)
 ) ENGINE=MyISAM;
 
-CREATE TABLE StimulusLibrary (
+CREATE TABLE NAFCStimLibrary (
   tstamp bigint(20) NOT NULL default '0',
   stim_path longtext NOT NULL,
   PRIMARY KEY  (tstamp)
