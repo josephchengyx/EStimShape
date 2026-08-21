@@ -34,18 +34,20 @@ isogabor_plot_path = f"{base_dir}/{isogabor_database}/plots"
 lightness_plot_path = f"{base_dir}/{lightness_database}/plots"
 shuffle_plot_path = f"{base_dir}/{shuffle_database}/plots"
 pc_maps_path = f"{base_dir}/{ga_database}/pc_maps"
-try:
 
-    ga_config = EStimShapeConfig(
-                                   is_alexnet_mock=False,
-                                   database=ga_database,
-                                   base_intan_path=ga_intan_path,
-                                   java_output_dir=java_output_dir,
-                                   allen_dist_dir=allen_dist)
-    ga_config.ga_name = ga_name
-except:
-    print("Error in creating GA config")
-    # print exception:
-    import traceback
-    traceback.print_exc()
+if __name__ == "__main__":
+    try:
+
+        ga_config = EStimShapeConfig(
+                                       is_alexnet_mock=False,
+                                       database=ga_database,
+                                       base_intan_path=ga_intan_path,
+                                       java_output_dir=java_output_dir,
+                                       allen_dist_dir=allen_dist)
+        ga_config.ga_name = ga_name
+    except:
+        print("Error in creating GA config")
+        # print exception:
+        import traceback
+        traceback.print_exc()
 

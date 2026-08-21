@@ -11,8 +11,8 @@ from src.startup.db_factory import migrate_database, reset_internal_state
 # Import existing utilities instead of recreating them
 from src.startup.setup_xper_properties_and_dirs import XperPropertiesModifier, make_path
 
-BASE_PATH = "/home/connorlab/Documents/EStimShape"
-SHELL_SCRIPTS_PATH = "/home/connorlab/git/EStimShape/xper-train/shellScripts"
+BASE_PATH = "/home/connorlab/Documents/GitHub/EStimShape"
+SHELL_SCRIPTS_PATH = "/home/connorlab/GitHub/EStimShape/xper-train/shellScripts"
 INTAN_REMOTE_PATH = "/run/user/1000/gvfs/sftp:host=172.30.9.78"
 INTAN_BASE_PATH = "/mnt/data/EStimShape"
 
@@ -22,12 +22,12 @@ TEMPLATE_DATE = '251222'
 TEMPLATE_LOCATION_ID = '0'
 
 # Database connection constants
-HOST = '172.30.6.61'
+HOST = '172.30.9.88'
 USER = 'xper_rw'
 PASS = 'up2nite'
 
 # MySQL backup parameters
-MYSQL_HOST = '172.30.6.61'
+MYSQL_HOST = '172.30.9.88'
 MYSQL_USER = 'xper_rw'
 MYSQL_PASSWORD = 'up2nite'
 
@@ -100,14 +100,14 @@ class ExperimentType(ABC):
 
     def get_database_name(self) -> str:
         """Generate database name following naming convention"""
-        return f"allen_{self.get_experiment_prefix()}_{self.type_name}_{self.date}_{self.location_id}"
+        return f"joseph_{self.get_experiment_prefix()}_{self.type_name}_{self.date}_{self.location_id}"
 
     def get_experiment_id(self):
         return f"{self.date}_{self.location_id}_{self.get_experiment_prefix()}"
 
     def get_template_database_name(self) -> str:
         """Generate template database name"""
-        return f"allen_{self.get_experiment_prefix()}_{TEMPLATE_TYPE}_{TEMPLATE_DATE}_{TEMPLATE_LOCATION_ID}"
+        return f"joseph_{self.get_experiment_prefix()}_{TEMPLATE_TYPE}_{TEMPLATE_DATE}_{TEMPLATE_LOCATION_ID}"
 
     def setup_database(self) -> None:
         """Create database from template - Template method"""
@@ -206,6 +206,106 @@ class GAExperiment(ExperimentType):
 
     def get_intan_path(self) -> str:
         """Return intan path for GA experiment"""
+        return f"{self.intan_base_path}/{self.get_database_name()}"
+
+
+class NAFCPairExperiment(ExperimentType):
+    """NAFC associate pair experiment type"""
+    def get_experiment_prefix(self) -> str:
+        return "nafc"
+
+    def get_context_variable_name(self) -> str:
+        return "nafcpair_database"
+
+    def get_version_variable_name(self) -> str:
+        return "VERSION_NAFC"
+
+    def get_copy_data_tables(self) -> List[str]:
+        return ["SystemVar", "InternalState", "NAFCStimLibrary"]
+
+    def get_properties_file_path(self) -> str:
+        return f'{self.shellscripts_dir}/xper.properties.nafcpair'
+
+    def get_properties_dict(self, r2_sftp: str) -> Dict[str, str]:
+        db_name = self.get_database_name()
+        current_date = datetime.now().strftime("%y%m%d")
+        stimuli_base_r = f"{self.base_dir}/stimuli/pairs"
+        r_nafc_path = f"{stimuli_base_r}"  # TODO: update when nafc & passive libraries finalized
+
+        return {
+            "jdbc.url": f"jdbc:mysql://{db_ip}/{db_name}?rewriteBatchedStatements=true",
+            "stimlib.jdbc.url": f"jdbc:mysql://{db_ip}/{db_name}?rewriteBatchedStatements=true",
+            "experiment.stimlib_path": f"{r2_sftp}{r_nafc_path}",
+            "intan.default_save_path": f"{self.intan_base_path}/{db_name}",
+        }
+
+    def create_directories(self) -> None:
+        pass
+
+    def get_local_backup_paths(self) -> List[str]:
+        """Return local paths to backup for NAFC pair experiment"""
+        db_name = self.get_database_name()
+        return [f"{self.base_dir}/{db_name}"]
+
+    def get_remote_backup_paths(self) -> Dict[str, str]:
+        """Return remote paths to backup for NAFC pair experiment"""
+        db_name = self.get_database_name()
+        return {
+            "intan_recordings": f"{self.intan_remote_dir}{self.intan_base_path}/{db_name}"
+        }
+
+    def get_intan_path(self) -> str:
+        """Return intan path for NAFC pair experiment"""
+        return f"{self.intan_base_path}/{self.get_database_name()}"
+
+
+class PassivePairExperiment(ExperimentType):
+    """Passive associate pair experiment type"""
+    def get_experiment_prefix(self) -> str:
+        return "passive"
+
+    def get_context_variable_name(self) -> str:
+        return "passive_database"
+
+    def get_version_variable_name(self) -> str:
+        return "VERSION_PASSIVE"
+
+    def get_copy_data_tables(self) -> List[str]:
+        return ["SystemVar", "InternalState"]
+
+    def get_properties_file_path(self) -> str:
+        return f'{self.shellscripts_dir}/xper.properties.passivepair'
+
+    def get_properties_dict(self, r2_sftp: str) -> Dict[str, str]:
+        db_name = self.get_database_name()
+        current_date = datetime.now().strftime("%y%m%d")
+        stimuli_base_r = f"{self.base_dir}/stimuli/pairs"
+        r_passive_path = f"{stimuli_base_r}"  # TODO: update when nafc & passive libraries finalized
+
+        return {
+            "jdbc.url": f"jdbc:mysql://{db_ip}/{db_name}?rewriteBatchedStatements=true",
+            "stimlib.jdbc.url": f"jdbc:mysql://{db_ip}/{db_name}?rewriteBatchedStatements=true",
+            "experiment.stimlib_path": f"{r2_sftp}{r_passive_path}",
+            "intan.default_save_path": f"{self.intan_base_path}/{db_name}",
+        }
+
+    def create_directories(self) -> None:
+        pass
+
+    def get_local_backup_paths(self) -> List[str]:
+        """Return local paths to backup for NAFC pair experiment"""
+        db_name = self.get_database_name()
+        return [f"{self.base_dir}/{db_name}"]
+
+    def get_remote_backup_paths(self) -> Dict[str, str]:
+        """Return remote paths to backup for NAFC pair experiment"""
+        db_name = self.get_database_name()
+        return {
+            "intan_recordings": f"{self.intan_remote_dir}{self.intan_base_path}/{db_name}"
+        }
+
+    def get_intan_path(self) -> str:
+        """Return intan path for NAFC pair experiment"""
         return f"{self.intan_base_path}/{self.get_database_name()}"
 
 
@@ -453,10 +553,8 @@ class ExperimentManager:
         # Define the experiments in order
         self.experiments = [
             GAExperiment(type_name, date, location_id),
-            NAFCExperiment(type_name, date, location_id),
-            IsoGaborExperiment(type_name, date, location_id),
-            LightnessExperiment(type_name, date, location_id),
-            ShuffleExperiment(type_name, date, location_id),
+            NAFCPairExperiment(type_name, date, location_id),
+            PassivePairExperiment(type_name, date, location_id),
         ]
 
 
@@ -537,6 +635,26 @@ class ExperimentManager:
             version_file.write(version_content)
 
         print("Version file updated successfully.")
+
+    @staticmethod
+    def database_exists(db_name) -> bool:
+        """Check if database {db_name} already exists"""
+
+        try:
+            # Connect to MySQL server
+            conn = mysql.connector.connect(host=HOST, user=USER, password=PASS)
+            cursor = conn.cursor()
+            cursor.execute(f"SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = '{db_name}'")
+            if cursor.fetchone():
+                conn.close()
+                return True
+            else:
+                conn.close()
+                return False
+
+        except mysql.connector.Error as e:
+            print(f"Database connection error: {e}")
+            return False
 
     def databases_exist(self) -> bool:
         """Check if any databases for this experiment set already exist"""
@@ -624,5 +742,37 @@ def main():
         manager.full_setup()
 
 
+def lite():
+    """(lite version) Main function: prompts user, checks if databases exist, then sets up database if not present"""
+
+    # Get user input (same as your current code)
+    current_date = input("Enter the date yymmdd, press enter to default to current date: ").strip()
+    if current_date == "":
+        current_date = datetime.now().strftime("%y%m%d")
+
+    task_name = input("Enter the task (e.g., nafc, passive): ").strip().lower()
+    type_name = input("Enter the type (e.g., train, test, exp): ").strip().lower()
+
+    match task_name:
+        case "nafc":
+            experiment = NAFCPairExperiment(type_name, current_date, 0)
+        case "passive":
+            experiment = PassivePairExperiment(type_name, current_date, 0)
+        case _:
+            print("Unknown/unsupported task specified. Exiting.")
+            return
+
+    ExperimentType.get_database_name = lambda self: f"joseph_{self.get_experiment_prefix()}_{self.type_name}_{self.date}"
+    ExperimentType.get_template_database_name = lambda self: f"joseph_{self.get_experiment_prefix()}_template"
+
+    # Check if databases exist and choose action
+    if ExperimentManager.database_exists(experiment.get_database_name()):
+        print("Database already exists.")
+    else:
+        print("Database doesn't exist. Creating new database...")
+        experiment.setup_database()
+
+
 if __name__ == "__main__":
-    main()
+#     main()
+    lite()

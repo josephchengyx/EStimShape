@@ -4,7 +4,7 @@ import mysql.connector
 from clat.util.connection import Connection
 from src.pga.multi_ga_db_util import MultiGaDbUtil
 
-HOST = '172.30.6.61'
+HOST = '172.30.9.88'
 USER = 'xper_rw'
 PASS = 'up2nite'
 TEMPLATE_TYPE = 'test'
