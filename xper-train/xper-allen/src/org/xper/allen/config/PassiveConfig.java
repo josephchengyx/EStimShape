@@ -51,7 +51,7 @@ public class PassiveConfig {
     @ExternalValue("jdbc.driver")
     public String jdbcDriver;
 
-    @ExternalValue("jdbc.url")
+    @ExternalValue("passive.jdbc.url")
     public String jdbcUrl;
 
     @ExternalValue("stimlib.jdbc.url")
@@ -172,7 +172,7 @@ public class PassiveConfig {
         } catch (PropertyVetoException e) {
             throw new DbException(e);
         }
-        source.setJdbcUrl(stimlibJdbcUrl);
+        source.setJdbcUrl(jdbcUrl);
         source.setUser(jdbcUserName);
         source.setPassword(jdbcPassword);
         return source;

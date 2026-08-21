@@ -41,8 +41,8 @@ public class PassivePairBlockGen extends AbstractTrialGenerator {
 
         for (int i = 0; i < numTrials; i++) {
             String[] pair     = pairs.get(i % pairs.size());
-            String samplePath = pair[0];
-            String matchPath  = pair[1];
+            String samplePath = experimentStimLibPath + "/" + pair[0];
+            String matchPath  = experimentStimLibPath + "/" + pair[1];
 
             //SAMPLE
             long sampleId = globalTimeUtil.currentTimeMicros();

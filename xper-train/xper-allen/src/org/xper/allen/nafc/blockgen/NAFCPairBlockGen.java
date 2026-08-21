@@ -61,8 +61,8 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
             long sampleId = globalTimeUtil.currentTimeMicros();
             long taskId = sampleId;
             String[] pair     = pairs.get(i % pairs.size());
-            String samplePath = pair[0];
-            String matchPath  = pair[1];
+            String samplePath = experimentStimLibPath + "/" + pair[0];
+            String matchPath  = experimentStimLibPath + "/" + pair[1];
             PngSpec sampleSpec = new PngSpec(0, 0, sampleDimensions, samplePath);
             dbUtil.writeStimObjData(sampleId, sampleSpec.toXml(), "sample");
 
@@ -73,7 +73,7 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
             //Handling shuffling & removing Match from possible distractors
             List<String> distractorList = new ArrayList<>();
             for (String stimPath: stimList) {
-                distractorList.add(stimPath);
+                distractorList.add(experimentStimLibPath + "/" + stimPath);
             }
             distractorList.remove(samplePath);
             distractorList.remove(matchPath);

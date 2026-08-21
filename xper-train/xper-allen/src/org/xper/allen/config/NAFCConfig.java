@@ -271,7 +271,7 @@ public class NAFCConfig {
 		} catch (PropertyVetoException e) {
 			throw new DbException(e);
 		}
-		source.setJdbcUrl(stimlibJdbcUrl);
+		source.setJdbcUrl(jdbcUrl);
 		source.setUser(jdbcUserName);
 		source.setPassword(jdbcPassword);
 		return source;
