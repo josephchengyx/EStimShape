@@ -10,7 +10,10 @@ import org.xper.rfplot.drawing.png.ImageDimensions;
 import org.xper.rfplot.drawing.png.PngSpec;
 import org.xper.time.TimeUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 import static org.xper.allen.nafc.blockgen.NAFCCoordinateAssigner.inclusiveRandomDouble;
 
@@ -26,27 +29,47 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
     Random r = new Random();
     long genId = 1;
 
-    public void generate(int numTrials, int numChoices,
-                         double width, double height, double eyeWinSize,
-                         double choiceRadiusLowerLim, double choiceRadiusUpperLim,
-                         double alphaLowerLim, double alphaUpperLim,
-                         double distractorDistanceLowerLim,  double distractorDistanceUpperLim,
-                         double distractorScaleLowerLim, double distractorScaleUpperLim,
-                         int distractorPresentationDelay
-                         ) {
+    /**
+     * Mixed-condition generation. Each condition carries its own trial count;
+     * trials are expanded, shuffled together, and written in shuffled order so
+     * conditions interleave. Task ids are assigned inside the write loop, so
+     * shuffled order becomes presentation order.
+     */
+    public void generate(List<NAFCPairParams> conditions) {
+        if (conditions == null || conditions.isEmpty()) {
+            throw new IllegalArgumentException("No conditions supplied.");
+        }
+
+        List<NAFCPairParams> paramsPerTrial = new ArrayList<>();
+        for (NAFCPairParams condition : conditions) {
+            for (int j = 0; j < condition.getNumTrials(); j++) {
+                paramsPerTrial.add(condition);
+            }
+        }
+        if (paramsPerTrial.isEmpty()) {
+            throw new IllegalArgumentException("Conditions supplied, but total number of trials is 0.");
+        }
+        Collections.shuffle(paramsPerTrial);
 
         List<String> stimList = dbUtil.readStimulusLibrary(TASK_TYPE);
-        List<String[]> pairs = dbUtil.readAssociatePairs(TASK_TYPE);
+        List<String[]> pairs  = dbUtil.readAssociatePairs(TASK_TYPE);
         Collections.shuffle(pairs);
-        //FIXED-PARAMETERS
-        //int numTrials = 100;
-        //SAMPLE
-        ImageDimensions sampleDimensions = new ImageDimensions(width,height);
-        //CHOICES
-        RewardPolicy rewardPolicy = RewardPolicy.LIST;
-        long[] eStimObjData = {1};
 
-        //GENERATION
+        if (pairs.isEmpty()) {
+            throw new IllegalStateException(
+                    "NAFCPairLibrary is empty — seed the session pair library before generating.");
+        }
+
+        int maxChoices = 0;
+        for (NAFCPairParams condition : conditions) {
+            maxChoices = Math.max(maxChoices, condition.getNumChoices());
+        }
+        if (stimList.size() < maxChoices + 1) {
+            throw new IllegalStateException(
+                    "NAFCStimLibrary has " + stimList.size() + " entries but up to "
+                            + (maxChoices - 1) + " distractors are needed per trial.");
+        }
+
         try {
             /**
              * Gen ID is important for xper to be able to load new tasks on the fly. It will only do so if the generation Id is upticked.
@@ -56,101 +79,148 @@ public class NAFCPairBlockGen extends AbstractTrialGenerator {
             dbUtil.writeReadyGenerationInfo(genId, 0);
         }
 
-        for (int i = 0; i < numTrials; i++) {
-            //SAMPLE + MATCH
-            long sampleId = globalTimeUtil.currentTimeMicros();
-            long taskId = sampleId;
-            String[] pair     = pairs.get(i % pairs.size());
-            String samplePath = experimentStimLibPath + "/" + pair[0];
-            String matchPath  = experimentStimLibPath + "/" + pair[1];
-            PngSpec sampleSpec = new PngSpec(0, 0, sampleDimensions, samplePath);
-            dbUtil.writeStimObjData(sampleId, sampleSpec.toXml(), "sample");
-
-            //CHOICE
-            int correctChoice = r.nextInt(numChoices);
-            int[] rewardList  = {correctChoice};
-
-            //Handling shuffling & removing Match from possible distractors
-            List<String> distractorList = new ArrayList<>();
-            for (String stimPath: stimList) {
-                distractorList.add(experimentStimLibPath + "/" + stimPath);
-            }
-            distractorList.remove(samplePath);
-            distractorList.remove(matchPath);
-            Collections.shuffle(distractorList);
-
-            //EyewinCoords of target and target location identical
-            DistancedDistractorsUtil ddUtil = new DistancedDistractorsUtil(numChoices, choiceRadiusLowerLim, choiceRadiusUpperLim, distractorDistanceLowerLim,  distractorDistanceUpperLim);
-            Coordinates2D matchEyeWinCoords = new Coordinates2D();
-            ArrayList<Coordinates2D> distractorsEyeWinCoords = new ArrayList<Coordinates2D>();
-
-            //Coordinates2D[] targetEyeWinCoords = new Coordinates2D[]{};
-            //targetEyeWinCoords = distancedDistractorsEquidistantRandomChoices(choiceRadiusLowerLim,choiceRadiusUpperLim,numChoices, distractorList);
-
-            //Step through all of the choices. If the index corresponds to the randomly decided correct choice index, write path of match.
-            //else, write the path of one of the distractors. The paths of the distractor is found through stepping through shuffled list of distractors
-            int distractorIndex = 0;
-            long[] choiceId   = new long[numChoices];
-
-            ArrayList<Coordinates2D> targetEyeWinCoords = new ArrayList<Coordinates2D>();
-            for (int j = 0; j < numChoices; j++) {
-                choiceId[j] = sampleId + j + 1;
-
-                if (j==correctChoice){
-                    //Size
-                    ImageDimensions matchDimensions = new ImageDimensions(width, height);
-
-                    //Distance
-                    matchEyeWinCoords = ddUtil.getMatchCoords();
-
-                    PngSpec choiceSpec = new PngSpec(matchEyeWinCoords.getX(), matchEyeWinCoords.getY(), matchDimensions, matchPath);
-                    dbUtil.writeStimObjData(choiceId[j], choiceSpec.toXml(), "choice " + j + "; " + "match");
-
-                    targetEyeWinCoords.add(matchEyeWinCoords); //to be converted to array later to pass as targetEyeWindow
-                }
-                else{
-                    //Alpha
-                    double randomAlpha = inclusiveRandomDouble(alphaLowerLim, alphaUpperLim);
-
-                    //Size
-                    double randomScale = inclusiveRandomDouble(distractorScaleLowerLim, distractorScaleUpperLim);
-                    ImageDimensions distractorDimensions = new ImageDimensions();
-                    distractorDimensions = new ImageDimensions(width*randomScale, height*randomScale);
-
-                    //Distance
-                    Coordinates2D distractorEyeWinCoords = ddUtil.popDistractorCoord();
-                    distractorsEyeWinCoords.add(distractorEyeWinCoords);
-
-                    PngSpec choiceSpec = new PngSpec(distractorEyeWinCoords.getX(), distractorEyeWinCoords.getY(),distractorDimensions, distractorList.get(distractorIndex), randomAlpha);
-                    dbUtil.writeStimObjData(choiceId[j], choiceSpec.toXml(), "choice " + j + "; " + "distractor");
-                    distractorIndex += 1;
-
-                    targetEyeWinCoords.add(distractorEyeWinCoords);
-                }
-            }
-
-            //stimSpec just needs Ids, not the path of the pngs themselves. Pngs are stored in StimObjData
-            Coordinates2D[] targetEyeWinCoordsArray = targetEyeWinCoords.toArray(new Coordinates2D[0]);
-
-            ArrayList<Double> targetEyeWinSize = new ArrayList<Double>();
-            for(Coordinates2D choice:targetEyeWinCoordsArray){
-                targetEyeWinSize.add(eyeWinSize);
-            }
-            double[] targetEyeWinSizeArray = new double[targetEyeWinSize.size()];
-            for(int j=0; j < targetEyeWinSize.size(); j++) {
-                targetEyeWinSizeArray[j] = targetEyeWinSize.get(j);
-            }
-
-            NAFCStimSpecSpec stimSpec = new NAFCStimSpecSpec(targetEyeWinCoordsArray, targetEyeWinSizeArray, sampleId, choiceId,
-                    eStimObjData, rewardPolicy, rewardList, distractorPresentationDelay);
-            String spec = stimSpec.toXml();
-
-            dbUtil.writeStimSpec(taskId, spec);
-            dbUtil.writeTaskToDo(taskId, taskId, -1, genId);
+        for (int i = 0; i < paramsPerTrial.size(); i++) {
+            writeTrial(paramsPerTrial.get(i), i, pairs, stimList);
         }
-        dbUtil.updateReadyGenerationInfo(genId, numTrials);
-        System.out.println("Done generating " + numTrials + " NAFC trials.");
-        return;
+
+        dbUtil.updateReadyGenerationInfo(genId, paramsPerTrial.size());
+        System.out.println("Done generating " + paramsPerTrial.size() + " NAFC trials across "
+                + conditions.size() + " condition(s).");
+    }
+
+    /** Single-condition generation. Preserved so NAFCPairGenerator's CLI keeps working. */
+    public void generate(int numTrials, int numChoices,
+                         double width, double height, double eyeWinSize,
+                         double choiceRadiusLowerLim, double choiceRadiusUpperLim,
+                         double alphaLowerLim, double alphaUpperLim,
+                         double distractorDistanceLowerLim, double distractorDistanceUpperLim,
+                         double distractorScaleLowerLim, double distractorScaleUpperLim,
+                         int distractorPresentationDelay) {
+
+        NAFCPairParams p = new NAFCPairParams();
+        p.setNumTrials(numTrials);
+        p.setNumChoices(numChoices);
+        p.setWidth(width);
+        p.setHeight(height);
+        p.setEyeWinSize(eyeWinSize);
+        p.setChoiceRadiusLowerLim(choiceRadiusLowerLim);
+        p.setChoiceRadiusUpperLim(choiceRadiusUpperLim);
+        p.setAlphaLowerLim(alphaLowerLim);
+        p.setAlphaUpperLim(alphaUpperLim);
+        p.setDistractorDistanceLowerLim(distractorDistanceLowerLim);
+        p.setDistractorDistanceUpperLim(distractorDistanceUpperLim);
+        p.setDistractorScaleLowerLim(distractorScaleLowerLim);
+        p.setDistractorScaleUpperLim(distractorScaleUpperLim);
+        p.setDistractorPresentationDelay(distractorPresentationDelay);
+
+        generate(Collections.singletonList(p));
+    }
+
+    /** Writes one trial under the given condition. */
+    private void writeTrial(NAFCPairParams p, int trialIndex,
+                            List<String[]> pairs, List<String> stimList) {
+
+        RewardPolicy rewardPolicy = RewardPolicy.LIST;
+        long[] eStimObjData = {1};
+
+        int numChoices = p.getNumChoices();
+        ImageDimensions sampleDimensions = new ImageDimensions(p.getWidth(), p.getHeight());
+
+        //SAMPLE + MATCH
+        long sampleId = globalTimeUtil.currentTimeMicros();
+        long taskId   = sampleId;
+        String[] pair     = pairs.get(trialIndex % pairs.size());
+        String samplePath = experimentStimLibPath + "/" + pair[0];
+        String matchPath  = experimentStimLibPath + "/" + pair[1];
+        PngSpec sampleSpec = new PngSpec(0, 0, sampleDimensions, samplePath);
+        dbUtil.writeStimObjData(sampleId, sampleSpec.toXml(), "sample");
+
+        //CHOICE
+        int correctChoice = r.nextInt(numChoices);
+        int[] rewardList  = {correctChoice};
+
+        //Handling shuffling & removing Match from possible distractors
+        List<String> distractorList = new ArrayList<String>();
+        for (String stimPath : stimList) {
+            distractorList.add(experimentStimLibPath + "/" + stimPath);
+        }
+        distractorList.remove(samplePath);
+        distractorList.remove(matchPath);
+        Collections.shuffle(distractorList);
+
+        //EyewinCoords of target and target location identical
+        DistancedDistractorsUtil ddUtil = new DistancedDistractorsUtil(
+                numChoices,
+                p.getChoiceRadiusLowerLim(), p.getChoiceRadiusUpperLim(),
+                p.getDistractorDistanceLowerLim(), p.getDistractorDistanceUpperLim());
+        ArrayList<Coordinates2D> distractorsEyeWinCoords = new ArrayList<Coordinates2D>();
+
+        //Step through all of the choices. If the index corresponds to the randomly decided correct choice index, write path of match.
+        //else, write the path of one of the distractors. The paths of the distractor is found through stepping through shuffled list of distractors
+        int distractorIndex = 0;
+        long[] choiceId = new long[numChoices];
+
+        ArrayList<Coordinates2D> targetEyeWinCoords = new ArrayList<>();
+        for (int j = 0; j < numChoices; j++) {
+            choiceId[j] = sampleId + j + 1;
+
+            if (j == correctChoice) {
+                //Size
+                ImageDimensions matchDimensions = new ImageDimensions(p.getWidth(), p.getHeight());
+
+                //Distance
+                Coordinates2D matchEyeWinCoords = ddUtil.getMatchCoords();
+
+                PngSpec choiceSpec = new PngSpec(matchEyeWinCoords.getX(), matchEyeWinCoords.getY(),
+                        matchDimensions, matchPath);
+                dbUtil.writeStimObjData(choiceId[j], choiceSpec.toXml(), "choice " + j + "; match");
+
+                targetEyeWinCoords.add(matchEyeWinCoords); //to be converted to array later to pass as targetEyeWindow
+            }
+            else {
+                //Alpha
+                double randomAlpha = inclusiveRandomDouble(p.getAlphaLowerLim(), p.getAlphaUpperLim());
+
+                //Size
+                double randomScale = inclusiveRandomDouble(p.getDistractorScaleLowerLim(),
+                        p.getDistractorScaleUpperLim());
+                ImageDimensions distractorDimensions =
+                        new ImageDimensions(p.getWidth() * randomScale, p.getHeight() * randomScale);
+
+                //Distance
+                Coordinates2D distractorEyeWinCoords = ddUtil.popDistractorCoord();
+                distractorsEyeWinCoords.add(distractorEyeWinCoords);
+
+                PngSpec choiceSpec = new PngSpec(
+                        distractorEyeWinCoords.getX(), distractorEyeWinCoords.getY(),
+                        distractorDimensions, distractorList.get(distractorIndex), randomAlpha);
+                dbUtil.writeStimObjData(choiceId[j], choiceSpec.toXml(), "choice " + j + "; distractor");
+                distractorIndex += 1;
+
+                targetEyeWinCoords.add(distractorEyeWinCoords);
+            }
+        }
+
+        //stimSpec just needs Ids, not the path of the pngs themselves. Pngs are stored in StimObjData
+        Coordinates2D[] targetEyeWinCoordsArray = targetEyeWinCoords.toArray(new Coordinates2D[0]);
+
+        ArrayList<Double> targetEyeWinSize = new ArrayList<Double>();
+        for(Coordinates2D choice:targetEyeWinCoordsArray){
+            targetEyeWinSize.add(p.getEyeWinSize());
+        }
+        double[] targetEyeWinSizeArray = new double[targetEyeWinSize.size()];
+        for(int j=0; j < targetEyeWinSize.size(); j++) {
+            targetEyeWinSizeArray[j] = targetEyeWinSize.get(j);
+        }
+
+        NAFCStimSpecSpec stimSpec = new NAFCStimSpecSpec(
+                targetEyeWinCoordsArray, targetEyeWinSizeArray, sampleId, choiceId,
+                eStimObjData, rewardPolicy, rewardList, p.getDistractorPresentationDelay());
+
+        // Third argument records this trial's condition, so trials can be binned
+        // by condition in analysis without inferring it from coordinates.
+        dbUtil.writeStimSpec(taskId, stimSpec.toXml(), p.toXml());
+        dbUtil.writeTaskToDo(taskId, taskId, -1, genId);
     }
 
     @Override

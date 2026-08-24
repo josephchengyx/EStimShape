@@ -5,20 +5,24 @@ import org.xper.allen.nafc.blockgen.NAFCPairBlockGen;
 import org.xper.allen.nafc.blockgen.NAFCPairParams;
 import org.xper.allen.nafc.blockgen.PairTrialParamDbUtil;
 import org.xper.exception.XGLException;
-import org.xper.time.TimeUtil;
 import org.xper.util.FileUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * Form launcher for {@link NAFCPairBlockGen}. Opens showing the parameters used
- * for the most recent generation, or the defaults from {@link NAFCPairParams} if
- * none have been recorded yet, and writes a new record after a successful run.
+ * Form launcher for {@link NAFCPairBlockGen}.
+ *
+ * Conditions are queued rather than generated one at a time: the form describes
+ * one condition, "Add Condition" appends it to the queue, and "Generate Trials"
+ * expands every queued condition, shuffles the trials together, and writes them
+ * interleaved. Queueing a single condition reproduces the previous behaviour.
  */
 public class NAFCPairGeneratorGUI {
 
@@ -45,33 +49,59 @@ public class NAFCPairGeneratorGUI {
     };
 
     private final Map<String, JTextField> fields = new LinkedHashMap<String, JTextField>();
+    private final List<NAFCPairParams> conditions = new ArrayList<NAFCPairParams>();
+    private final DefaultListModel<String> listModel = new DefaultListModel<String>();
+
     private final NAFCPairBlockGen generator;
     private final PairTrialParamDbUtil paramDbUtil;
 
+    private JList<String> conditionList;
+    private JLabel totalLabel;
+
     public NAFCPairGeneratorGUI(NAFCPairBlockGen generator,
-                                PairTrialParamDbUtil paramDbUtil) {
+                                    PairTrialParamDbUtil paramDbUtil) {
         this.generator = generator;
         this.paramDbUtil = paramDbUtil;
 
         for (int i = 0; i < LABELS.length; i++) {
             fields.put(LABELS[i], new JTextField(10));
         }
-        populateFrom(lastUsedOrDefaults());
+
+        List<NAFCPairParams> lastUsed = lastUsedOrDefaults();
+        conditions.addAll(lastUsed);
+        populateFrom(lastUsed.get(0));
     }
 
-    /** Parameters from the most recent generation, or a fresh set of defaults. */
-    private NAFCPairParams lastUsedOrDefaults() {
+    // ---------- persistence ----------
+
+    /**
+     * The condition list from the most recent generation, or a single default
+     * condition. Falls back to the old single-condition format so records
+     * written before mixed conditions existed still load.
+     */
+    private List<NAFCPairParams> lastUsedOrDefaults() {
+        List<NAFCPairParams> result = new ArrayList<NAFCPairParams>();
         try {
             String xml = paramDbUtil.readLatestTrialParams();
             if (xml != null && !xml.isEmpty()) {
-                return NAFCPairParams.fromXml(xml);
+                if (xml.trim().startsWith("<list>")) {
+                    result.addAll(NAFCPairParams.listFromXml(xml));
+                } else {
+                    result.add(NAFCPairParams.fromXml(xml));
+                }
             }
         } catch (Exception e) {
-            System.out.println("Could not read last-used parameters, using defaults: "
+            System.out.println("Could not read last used parameters, using defaults: "
                     + e.getMessage());
+            result.clear();
         }
-        return new NAFCPairParams();
+        if (result.isEmpty()) {
+            result.add(new NAFCPairParams());
+        }
+        return result;
     }
+
+    // ---------- form <-> params ----------
 
     private void populateFrom(NAFCPairParams p) {
         set(NUM_TRIALS,  p.getNumTrials());
@@ -121,6 +151,42 @@ public class NAFCPairGeneratorGUI {
         return Double.parseDouble(fields.get(label).getText().trim());
     }
 
+    // ---------- queue ----------
+
+    private String summarize(NAFCPairParams p) {
+        return p.getNumTrials() + " trials"
+                + "  |  " + p.getNumChoices() + "AFC"
+                + "  |  delay " + p.getDistractorPresentationDelay() + " ms"
+                + "  |  scale " + p.getDistractorScaleLowerLim() + "-" + p.getDistractorScaleUpperLim()
+                + "  |  dist " + p.getDistractorDistanceLowerLim() + "-" + p.getDistractorDistanceUpperLim() + " deg"
+                + "  |  alpha " + p.getAlphaLowerLim() + "-" + p.getAlphaUpperLim();
+    }
+
+    private void refreshList() {
+        listModel.clear();
+        int total = 0;
+        for (NAFCPairParams p : conditions) {
+            listModel.addElement(summarize(p));
+            total += p.getNumTrials();
+        }
+        totalLabel.setText("  " + conditions.size() + " condition(s), "
+                + total + " trials total — shuffled together on generate");
+    }
+
+    /** Reads the form, showing a dialog and returning null if a field is unparseable. */
+    private NAFCPairParams readFromFieldsOrWarn() {
+        try {
+            return readFromFields();
+        } catch (NumberFormatException nfe) {
+            JOptionPane.showMessageDialog(null,
+                    "Could not read a field value: " + nfe.getMessage(),
+                    "Invalid input", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+    }
+
+    // ---------- ui ----------
+
     public void show() {
         JPanel form = new JPanel(new GridLayout(0, 2, 8, 4));
         form.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
@@ -129,6 +195,81 @@ public class NAFCPairGeneratorGUI {
             form.add(entry.getValue());
         }
 
+        conditionList = new JList<String>(listModel);
+        conditionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane listScroll = new JScrollPane(conditionList);
+        listScroll.setBorder(BorderFactory.createTitledBorder("Queued conditions"));
+        listScroll.setPreferredSize(new Dimension(520, 220));
+
+        // Selecting a condition loads it back into the form for editing.
+        conditionList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent e) {
+                if (e.getValueIsAdjusting()) {
+                    return;
+                }
+                int i = conditionList.getSelectedIndex();
+                if (i >= 0 && i < conditions.size()) {
+                    populateFrom(conditions.get(i));
+                }
+            }
+        });
+
+        totalLabel = new JLabel();
+
+        JButton addButton = new JButton("Add Condition");
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                NAFCPairParams p = readFromFieldsOrWarn();
+                if (p != null) {
+                    conditions.add(p);
+                    refreshList();
+                    conditionList.setSelectedIndex(conditions.size() - 1);
+                }
+            }
+        });
+
+        JButton updateButton = new JButton("Update Selected");
+        updateButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int i = conditionList.getSelectedIndex();
+                if (i < 0) {
+                    return;
+                }
+                NAFCPairParams p = readFromFieldsOrWarn();
+                if (p != null) {
+                    conditions.set(i, p);
+                    refreshList();
+                    conditionList.setSelectedIndex(i);
+                }
+            }
+        });
+
+        JButton removeButton = new JButton("Remove Selected");
+        removeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int i = conditionList.getSelectedIndex();
+                if (i >= 0) {
+                    conditions.remove(i);
+                    refreshList();
+                }
+            }
+        });
+
+        JButton clearButton = new JButton("Clear All");
+        clearButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                conditions.clear();
+                refreshList();
+            }
+        });
+
+        JButton resetButton = new JButton("Reset Fields");
+        resetButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                populateFrom(new NAFCPairParams());
+            }
+        });
+
         JButton generateButton = new JButton("Generate Trials");
         generateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -136,48 +277,52 @@ public class NAFCPairGeneratorGUI {
             }
         });
 
-        JButton resetButton = new JButton("Reset to Defaults");
-        resetButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                populateFrom(new NAFCPairParams());
-            }
-        });
+        JPanel queueButtons = new JPanel();
+        queueButtons.add(addButton);
+        queueButtons.add(updateButton);
+        queueButtons.add(removeButton);
+        queueButtons.add(clearButton);
 
-        JPanel buttons = new JPanel();
-        buttons.add(resetButton);
-        buttons.add(generateButton);
+        JPanel runButtons = new JPanel();
+        runButtons.add(resetButton);
+        runButtons.add(generateButton);
+
+        JPanel right = new JPanel(new BorderLayout());
+        right.add(BorderLayout.CENTER, listScroll);
+        right.add(BorderLayout.NORTH, totalLabel);
+        right.add(BorderLayout.SOUTH, queueButtons);
 
         JFrame frame = new JFrame("NAFC Pair Trial Generator");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(BorderLayout.CENTER, form);
-        frame.getContentPane().add(BorderLayout.SOUTH, buttons);
+        frame.getContentPane().add(BorderLayout.WEST, form);
+        frame.getContentPane().add(BorderLayout.CENTER, right);
+        frame.getContentPane().add(BorderLayout.SOUTH, runButtons);
+
+        refreshList();
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
     private void generateTrials() {
-        NAFCPairParams p;
-        try {
-            p = readFromFields();
-        } catch (NumberFormatException nfe) {
-            JOptionPane.showMessageDialog(null,
-                    "Could not read a field value: " + nfe.getMessage(),
-                    "Invalid input", JOptionPane.ERROR_MESSAGE);
-            return;
+        // An empty queue falls back to the form, so single-condition use needs no queueing.
+        List<NAFCPairParams> toRun;
+        if (conditions.isEmpty()) {
+            NAFCPairParams p = readFromFieldsOrWarn();
+            if (p == null) {
+                return;
+            }
+            toRun = new ArrayList<NAFCPairParams>();
+            toRun.add(p);
+        } else {
+            toRun = new ArrayList<NAFCPairParams>(conditions);
         }
 
         try {
-            generator.generate(
-                    p.getNumTrials(), p.getNumChoices(),
-                    p.getWidth(), p.getHeight(), p.getEyeWinSize(),
-                    p.getChoiceRadiusLowerLim(), p.getChoiceRadiusUpperLim(),
-                    p.getAlphaLowerLim(), p.getAlphaUpperLim(),
-                    p.getDistractorDistanceLowerLim(), p.getDistractorDistanceUpperLim(),
-                    p.getDistractorScaleLowerLim(), p.getDistractorScaleUpperLim(),
-                    p.getDistractorPresentationDelay());
-
-            paramDbUtil.writeTrialParams(generator.getGlobalTimeUtil().currentTimeMicros(), p.toXml());
+            generator.generate(toRun);
+            paramDbUtil.writeTrialParams(
+                    generator.getGlobalTimeUtil().currentTimeMicros(),
+                    NAFCPairParams.listToXml(toRun));
             System.exit(0);
         } catch (Exception ex) {
             ex.printStackTrace();

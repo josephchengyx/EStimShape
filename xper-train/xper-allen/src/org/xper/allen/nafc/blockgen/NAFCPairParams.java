@@ -2,6 +2,9 @@ package org.xper.allen.nafc.blockgen;
 
 import com.thoughtworks.xstream.XStream;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Generation parameters for {@link NAFCPairBlockGen}.
  *
@@ -41,6 +44,22 @@ public class NAFCPairParams {
 
     public static NAFCPairParams fromXml(String xml) {
         return (NAFCPairParams) xstream.fromXML(xml);
+    }
+
+    public static String listToXml(List<NAFCPairParams> conditions) {
+        return xstream.toXML(new ArrayList<NAFCPairParams>(conditions));
+    }
+
+    /** Accepts either a list of conditions or a single legacy condition. */
+    @SuppressWarnings("unchecked")
+    public static List<NAFCPairParams> listFromXml(String xml) {
+        Object parsed = xstream.fromXML(xml);
+        if (parsed instanceof List) {
+            return new ArrayList<NAFCPairParams>((List<NAFCPairParams>) parsed);
+        }
+        List<NAFCPairParams> single = new ArrayList<NAFCPairParams>();
+        single.add((NAFCPairParams) parsed);
+        return single;
     }
 
     public int getNumTrials() { return numTrials; }
