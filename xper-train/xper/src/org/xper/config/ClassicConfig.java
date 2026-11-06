@@ -28,6 +28,7 @@ import org.xper.acq.ni.NiAnalogSamplingDevice;
 import org.xper.acq.ni.NiDigitalPortOutDevice;
 import org.xper.acq.vo.ComediChannelSpec;
 import org.xper.acq.vo.NiChannelSpec;
+import org.xper.drawing.object.*;
 import org.xper.experiment.*;
 import org.xper.classic.*;
 import org.xper.classic.vo.SlideTrialExperimentState;
@@ -39,12 +40,6 @@ import org.xper.drawing.BlankTaskScene;
 import org.xper.drawing.Coordinates2D;
 import org.xper.drawing.RGBColor;
 import org.xper.drawing.TaskScene;
-import org.xper.drawing.object.AlternatingScreenMarker;
-import org.xper.drawing.object.BlankScreen;
-import org.xper.drawing.object.Circle;
-import org.xper.drawing.object.FixationPoint;
-import org.xper.drawing.object.MonkeyWindow;
-import org.xper.drawing.object.Square;
 import org.xper.drawing.renderer.AbstractRenderer;
 import org.xper.drawing.renderer.PerspectiveRenderer;
 import org.xper.exception.ExperimentSetupException;
@@ -238,7 +233,7 @@ public class ClassicConfig {
 
 	@Bean
 	public FixationPoint punishmentFixationPoint(){
-		FixationPoint f = new FixationPoint ();
+		FixationPoint f = new SquareFixationPoint ();
 		f.setColor(new RGBColor(1, 0, 1));
 		f.setFixationPosition(xperFixationPosition());
 		f.setSize(xperFixationPointSize());
@@ -466,7 +461,7 @@ public class ClassicConfig {
 
 	@Bean
 	public FixationPoint consoleFixationPoint() {
-		FixationPoint fixation = new FixationPoint();
+		FixationPoint fixation = new SquareFixationPoint();
 		fixation.setColor(new RGBColor(1,1,0));
 		fixation.setSize(xperFixationPointSize());
 		fixation.setFixationPosition(xperFixationPosition());
@@ -507,7 +502,7 @@ public class ClassicConfig {
 
 	@Bean
 	public FixationPoint experimentFixationPoint() {
-		FixationPoint f = new FixationPoint();
+		FixationPoint f = new SquareFixationPoint();
 		f.setColor(xperFixationPointColor());
 		f.setFixationPosition(xperFixationPosition());
 		f.setSize(xperFixationPointSize());

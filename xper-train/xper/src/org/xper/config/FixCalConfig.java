@@ -24,10 +24,7 @@ import org.xper.console.ExperimentConsoleModel;
 import org.xper.console.ExperimentMessageReceiver;
 import org.xper.console.MessageReceiverEventListener;
 import org.xper.drawing.Coordinates2D;
-import org.xper.drawing.object.BlankScreen;
-import org.xper.drawing.object.Circle;
-import org.xper.drawing.object.FixationPoint;
-import org.xper.drawing.object.Square;
+import org.xper.drawing.object.*;
 import org.xper.drawing.renderer.AbstractRenderer;
 import org.xper.drawing.renderer.PerspectiveRenderer;
 import org.xper.drawing.renderer.PerspectiveStereoRenderer;
@@ -152,7 +149,7 @@ public class FixCalConfig {
 
 	@Bean
 	public FixationPoint experimentFixationPoint() {
-		FixationPoint f = new FixationPoint ();
+		FixationPoint f = new SquareFixationPoint();
 		f.setColor(classicConfig.xperFixationPointColor());
 		f.setSize(classicConfig.xperFixationPointSize());
 		return f;

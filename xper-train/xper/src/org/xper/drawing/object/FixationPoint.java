@@ -8,7 +8,7 @@ import org.xper.drawing.Drawable;
 import org.xper.drawing.RGBColor;
 import org.xper.drawing.renderer.AbstractRenderer;
 
-public class FixationPoint implements Drawable {
+public abstract class FixationPoint implements Drawable {
 
 	@Dependency
 	Coordinates2D fixationPosition;
@@ -32,23 +32,6 @@ public class FixationPoint implements Drawable {
 	}
 
 	void drawVertexes(Coordinates2D posInMm, double sizeInMm) {
-		double z = 0;
-
-		GL11.glColor4f(color.getRed(), color.getGreen(), color.getBlue(), 1f);
-
-		GL11.glPushMatrix();
-		GL11.glTranslated(posInMm.getX(), posInMm.getY(), z);
-		if (solid) {
-			GL11.glBegin(GL11.GL_QUADS);
-		} else {
-			GL11.glBegin(GL11.GL_LINE_LOOP);
-		}
-			GL11.glVertex3d(-sizeInMm/2., -sizeInMm/2., z);
-			GL11.glVertex3d(sizeInMm/2., -sizeInMm/2., z);
-			GL11.glVertex3d(sizeInMm/2., sizeInMm/2., z);
-			GL11.glVertex3d(-sizeInMm/2., sizeInMm/2., z);
-		GL11.glEnd();
-		GL11.glPopMatrix();
 	}
 
 	public Coordinates2D getFixationPosition() {

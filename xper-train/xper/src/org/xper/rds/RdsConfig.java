@@ -21,6 +21,7 @@ import org.xper.console.IConsolePlugin;
 import org.xper.drawing.RGBColor;
 import org.xper.drawing.object.BlankScreen;
 import org.xper.drawing.object.FixationPoint;
+import org.xper.drawing.object.SquareFixationPoint;
 import org.xper.drawing.renderer.AbstractRenderer;
 import org.xper.drawing.renderer.PerspectiveStereoRenderer;
 import org.xper.experiment.Experiment;
@@ -127,7 +128,7 @@ public class RdsConfig {
 	
 	@Bean
 	public FixationPoint consoleFixationPoint() {
-		FixationPoint fixation = new FixationPoint();
+		FixationPoint fixation = new SquareFixationPoint();
 		fixation.setColor(xperRdsFixationPointColor());
 		fixation.setSize(xperRdsFixationPointSize());
 		fixation.setFixationPosition(classicConfig.xperFixationPosition());

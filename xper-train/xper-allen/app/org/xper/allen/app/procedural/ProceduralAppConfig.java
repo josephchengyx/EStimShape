@@ -19,6 +19,7 @@ import org.xper.allen.noisy.nafc.NoisyNAFCPngScene;
 import org.xper.classic.MarkStimTrialDrawingController;
 import org.xper.drawing.object.BlankScreen;
 import org.xper.drawing.object.FixationPoint;
+import org.xper.drawing.object.SquareFixationPoint;
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,7 +60,7 @@ public class ProceduralAppConfig {
     }
     @Bean
     public FixationPoint experimentFixationPoint() {
-        FixationPoint f = new FixationPoint();
+        FixationPoint f = new SquareFixationPoint();
         f.setColor(pngConfig.classicConfig.xperFixationPointColor());
         f.setFixationPosition(pngConfig.classicConfig.xperFixationPosition());
         f.setSize(pngConfig.classicConfig.xperFixationPointSize());
